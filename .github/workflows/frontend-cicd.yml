@@ -69,17 +69,16 @@ jobs:
           port: ${{ env.SSH_PORT }}
           script: |
             set -e
-            # 백업 보관
-            if [ -d "${{ env.REMOTE_DIR }}" ]; then
-              rm -rf ${{
-                env.REMOTE_DIR
-              }}_prev && mv ${{ env.REMOTE_DIR }} ${{ env.REMOTE_DIR }}_prev || true
-            fi
-            # 새 빌드 반영
-            mv /tmp/${{ steps.prep.outputs.REL }} ${{ env.REMOTE_DIR }}
-            # 권한(정적 서빙에 충분)
-            sudo chown -R www-data:www-data ${{ env.REMOTE_DIR }}
-            sudo find ${{ env.REMOTE_DIR }} -type d -exec chmod 755 {} \;
-            sudo find ${{ env.REMOTE_DIR }} -type f -exec chmod 644 {} \;
-            # Nginx 검증/재적용
+            # 보조: 대상 디렉터리 존재/소유권 보장
+            sudo mkdir -p /var/www/youthjob
+            sudo chown -R $USER:$USER /var/www/youthjob
+
+            # 업로드한 빌드(/tmp/release_xxx) → /var/www/youthjob 로 동기화 (원자적, 권장)
+            rsync -a --delete "/tmp/${{ steps.prep.outputs.REL }}/" "/var/www/youthjob/"
+
+            # 권한 정리(정적 서빙용)
+            find /var/www/youthjob -type d -exec chmod 755 {} \;
+            find /var/www/youthjob -type f -exec chmod 644 {} \;
+
+            # Nginx 재적용
             sudo nginx -t && sudo systemctl reload nginx
