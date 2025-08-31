@@ -1,0 +1,85 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [ "main" ]       # main에 push 시 자동 배포
+  workflow_dispatch:           # 수동 실행 허용
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      BUILD_DIR: dist
+      REMOTE_DIR: /var/www/youthjob
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      SSH_PORT: ${{ secrets.SSH_PORT || 22 }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build (Vite → dist/)
+        run: npm run build
+
+      # 임시 릴리스 디렉토리 이름 생성 (SHA 기반)
+      - name: Prepare release name
+        id: prep
+        run: echo "REL=release_${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      # 서버에 임시 폴더 생성
+      - name: Create temp dir on server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ env.SSH_PORT }}
+          script: |
+            mkdir -p /tmp/${{ steps.prep.outputs.REL }}
+
+      # dist 업로드 → /tmp/REL 로
+      - name: Upload build files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ env.SSH_PORT }}
+          source: "${{ env.BUILD_DIR }}/*"
+          target: "/tmp/${{ steps.prep.outputs.REL }}/"
+
+      # 원자적 교체(다운타임 최소화) + 권한 정리 + Nginx 리로드
+      - name: Activate release
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ env.SSH_HOST }}
+          username: ${{ env.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ env.SSH_PORT }}
+          script: |
+            set -e
+            # 백업 보관
+            if [ -d "${{ env.REMOTE_DIR }}" ]; then
+              rm -rf ${{
+                env.REMOTE_DIR
+              }}_prev && mv ${{ env.REMOTE_DIR }} ${{ env.REMOTE_DIR }}_prev || true
+            fi
+            # 새 빌드 반영
+            mv /tmp/${{ steps.prep.outputs.REL }} ${{ env.REMOTE_DIR }}
+            # 권한(정적 서빙에 충분)
+            sudo chown -R www-data:www-data ${{ env.REMOTE_DIR }}
+            sudo find ${{ env.REMOTE_DIR }} -type d -exec chmod 755 {} \;
+            sudo find ${{ env.REMOTE_DIR }} -type f -exec chmod 644 {} \;
+            # Nginx 검증/재적용
+            sudo nginx -t && sudo systemctl reload nginx
