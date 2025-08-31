@@ -1,0 +1,5 @@
+.yj-footer{border-top:1px solid rgba(2,6,23,.06);background:#fff;margin-top:40px}
+.yj-footer__inner{max-width:1120px;margin:0 auto;padding:28px 20px}
+.yj-footer__links{display:flex;gap:16px;margin-bottom:8px}
+.yj-footer__links a{text-decoration:none;color:#475569;font-weight:600}
+.yj-footer__copy{margin:0;color:#94a3b8;font-size:14px}

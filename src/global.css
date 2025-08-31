@@ -1,0 +1,101 @@
+:root {
+  --bg: #0b1020;
+  --text: #0f172a;
+  --muted: #6b7280;
+  --brand: #2563eb;
+  --brand-weak: #dbeafe;
+  --card: #ffffff;
+  --shadow: 0 10px 30px rgba(2, 6, 23, 0.12);
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  color: var(--text);
+  background: #f7f8fb;
+}
+
+main { min-height: 60vh; }
+
+.yj-container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.yj-section { padding: 64px 0; }
+.yj-section--cards { padding-top: 32px; }
+
+.yj-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;               /* 16 → 36 */
+  align-items: stretch;
+}
+@media (max-width: 900px) {
+  .yj-cards { grid-template-columns: 1fr; }
+}
+
+.yj-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;       /* 얇은 라인 */
+  border-radius: 24px;             /* 더 둥글게 */
+  padding: 32px;                   /* 넉넉한 내부 여백 */
+  box-shadow: 0 8px 28px rgba(2, 6, 23, 0.06); /* 미세한 그림자 */
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.yj-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 16px 40px rgba(2,6,23,.10);
+  transform: translateY(-2px);
+}
+
+.yj-card__icon {
+  margin-bottom: 20px;
+  line-height: 0;                  /* 이미지 주변 여백 제거 */
+}
+.yj-card__icon img {
+  width: 90px;                     /* Figma 90×69 근접 */
+  height: auto;
+  display: block;
+  filter: grayscale(100%);         /* 회색 톤(선명 SVG면 불필요) */
+  opacity: .95;
+}
+.yj-card__title {
+  margin: 0 0 8px;
+  font-size: 24px;                 /* 살짝 크게 */
+  font-weight: 800;                /* 두껍게 */
+  color: #0f172a;                  /* 진한 남색 */
+}
+.yj-card__desc {
+  margin: 0;
+  color: #6b7280;                  /* 회색 텍스트 */
+  line-height: 1.6;
+  font-size: 16px;
+}
+.yj-card__desc { margin: 0; color: var(--muted); }
+
+.yj-notice {
+  padding: 14px 18px;
+  background: var(--brand-weak);
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* 공용 버튼 */
+.yj-btn {
+  display: inline-block;
+  padding: 12px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+.yj-btn--primary { background: var(--brand); color: #fff; }
+.yj-btn--ghost { background: rgba(255,255,255,.85); color: var(--text); border-color: rgba(15,23,42,.12); }
+.yj-btn--primary:hover { filter: brightness(0.95); }
+.yj-btn--ghost:hover { background: #fff; }

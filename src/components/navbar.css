@@ -1,0 +1,37 @@
+/* 기본: 살짝 투명 + 블러 (맨 위일 때) */
+.yj-nav{
+  position: sticky; top: 0; z-index: 40;
+  background: rgba(255,255,255,.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(2,6,23,.06);
+  transition: background .2s ease, backdrop-filter .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+/* 스크롤 후: 불투명 흰색 + 약한 그림자 (로고가 선명) */
+.yj-nav.is-solid{
+  background: #fff;
+  backdrop-filter: none;
+  border-color: rgba(2,6,23,.08);
+  box-shadow: 0 4px 16px rgba(2,6,23,.08);
+}
+
+.yj-nav__inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1120px;margin:0 auto;padding:0 20px}
+.yj-nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:900}
+.yj-nav__brand .yj-logo {
+  height: 60px;
+  width: auto;
+  display: block;
+}
+.yj-nav__menu{display:flex;gap:40px}
+.yj-nav__menu a{text-decoration:none;color:#334155;font-weight:600}
+.yj-nav__right{display:flex;align-items:center;gap:10px}
+.yj-nav__link{text-decoration:none;color:#334155;font-weight:600}
+.yj-nav__btn{text-decoration:none;padding:8px 14px;border-radius:999px;background:#024ef2;color:#fff;font-weight:700}
+.yj-nav__hamburger{display:none;width:42px;height:42px;border-radius:999px;border:1px solid rgba(2,6,23,.1);background:#fff;padding:8px;cursor:pointer}
+.yj-nav__hamburger span{display:block;height:2px;background:#111827;margin:5px 0}
+@media (max-width:900px){
+  .yj-nav__menu{position:absolute;left:0;right:0;top:64px;background:#fff;border-bottom:1px solid rgba(2,6,23,.06);display:none;flex-direction:column;padding:12px 20px}
+  .yj-nav__menu.is-open{display:flex}
+  .yj-nav__hamburger{display:inline-block}
+}
+
