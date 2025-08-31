@@ -2,8 +2,8 @@ name: Frontend CI/CD
 
 on:
   push:
-    branches: [ "main" ]        # main push 시 자동 배포
-  workflow_dispatch:             # 수동 실행 허용
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -32,11 +32,15 @@ jobs:
       - name: Build (Vite → dist/)
         run: npm run build
 
-      # dist '내용물'만 담도록 tar 생성
+      # 7자리 SHA로 릴리즈 이름 생성 (Runner에서 계산)
+      - name: Prepare release name
+        id: prep
+        run: echo "REL=release_${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
       - name: Pack dist as tar.gz
         run: tar -C "${{ env.BUILD_DIR }}" -czf bundle.tgz .
 
-      # 원격에 임시 작업 폴더 생성
+      # 원격에 동일 경로 생성 (→ steps.prep.outputs.REL 사용)
       - name: Prepare temp dir on server
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -46,10 +50,10 @@ jobs:
           port: ${{ env.SSH_PORT }}
           script: |
             set -e
-            REL="/tmp/release_${GITHUB_SHA::7}"
+            REL="/tmp/${{ steps.prep.outputs.REL }}"
             mkdir -p "$REL"
 
-      # bundle 업로드
+      # bundle 업로드 (동일 경로)
       - name: Upload bundle
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -58,9 +62,9 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ env.SSH_PORT }}
           source: "bundle.tgz"
-          target: "/tmp/release_${{ github.sha || 'sha' }}/"   # 동일 SHA 경로
+          target: "/tmp/${{ steps.prep.outputs.REL }}/"
 
-      # 서버에서 해제 → 루트로 동기화 → nginx reload
+      # 해제 → 루트로 동기화 → nginx reload (동일 경로)
       - name: Activate release
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -68,31 +72,25 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ env.SSH_PORT }}
+        # ↓↓↓ 여기서도 steps.prep.outputs.REL을 문자열로 “주입”해야 함
           script: |
             set -e
-            REL="/tmp/release_${GITHUB_SHA::7}"
+            REL="/tmp/${{ steps.prep.outputs.REL }}"
             DEST="${{ env.REMOTE_DIR }}"
 
-            # 도구 보장
             command -v tar >/dev/null 2>&1 || (sudo apt-get update -y && sudo apt-get install -y tar)
             command -v rsync >/dev/null 2>&1 || (sudo apt-get update -y && sudo apt-get install -y rsync)
 
-            # 목표 디렉토리 준비
             sudo mkdir -p "$DEST"
             sudo chown -R $USER:$USER "$DEST"
 
-            # 해제(임시) → 내용물만 동기화
             mkdir -p "$REL/unpack"
             tar -xzf "$REL/bundle.tgz" -C "$REL/unpack"
             rsync -a --delete "$REL/unpack/" "$DEST/"
 
-            # 퍼미션(정적 서빙)
             find "$DEST" -type d -exec chmod 755 {} \;
             find "$DEST" -type f -exec chmod 644 {} \;
 
-            # Nginx 적용 및 헬스체크
             sudo nginx -t && sudo systemctl reload nginx
             test -f "$DEST/index.html"
-
-            # 임시 정리
             rm -rf "$REL"
