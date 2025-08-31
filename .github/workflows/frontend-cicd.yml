@@ -2,8 +2,8 @@ name: Frontend CI/CD
 
 on:
   push:
-    branches: [ "main" ]       # main에 push 시 자동 배포
-  workflow_dispatch:           # 수동 실행 허용
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -32,12 +32,10 @@ jobs:
       - name: Build (Vite → dist/)
         run: npm run build
 
-      # 임시 릴리스 디렉토리 이름 생성 (SHA 기반)
       - name: Prepare release name
         id: prep
         run: echo "REL=release_${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
 
-      # 서버에 임시 폴더 생성
       - name: Create temp dir on server
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -48,18 +46,16 @@ jobs:
           script: |
             mkdir -p /tmp/${{ steps.prep.outputs.REL }}
 
-      # dist 업로드 → /tmp/REL 로
-      - name: Upload build files
+      - name: Upload build files (dist → /tmp/REL)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           port: ${{ env.SSH_PORT }}
-          source: "${{ env.BUILD_DIR }}/*"
+          source: "${{ env.BUILD_DIR }}/*"          # dist/* (내용물)
           target: "/tmp/${{ steps.prep.outputs.REL }}/"
 
-      # 원자적 교체(다운타임 최소화) + 권한 정리 + Nginx 리로드
       - name: Activate release
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -69,16 +65,21 @@ jobs:
           port: ${{ env.SSH_PORT }}
           script: |
             set -e
-            # 보조: 대상 디렉터리 존재/소유권 보장
-            sudo mkdir -p /var/www/youthjob
-            sudo chown -R $USER:$USER /var/www/youthjob
+            # rsync 보장
+            if ! command -v rsync >/dev/null 2>&1; then
+              sudo apt-get update -y && sudo apt-get install -y rsync
+            fi
 
-            # 업로드한 빌드(/tmp/release_xxx) → /var/www/youthjob 로 동기화 (원자적, 권장)
-            rsync -a --delete "/tmp/${{ steps.prep.outputs.REL }}/" "/var/www/youthjob/"
+            # 대상 디렉터리 보장 및 소유권(ubuntu) 유지
+            sudo mkdir -p ${{ env.REMOTE_DIR }}
+            sudo chown -R $USER:$USER ${{ env.REMOTE_DIR }}
 
-            # 권한 정리(정적 서빙용)
-            find /var/www/youthjob -type d -exec chmod 755 {} \;
-            find /var/www/youthjob -type f -exec chmod 644 {} \;
+            # dist '내용물'만 동기화 (마지막 슬래시 중요)
+            rsync -a --delete "/tmp/${{ steps.prep.outputs.REL }}/" "${{ env.REMOTE_DIR }}/"
 
-            # Nginx 재적용
+            # 권한(정적 서빙)
+            find ${{ env.REMOTE_DIR }} -type d -exec chmod 755 {} \;
+            find ${{ env.REMOTE_DIR }} -type f -exec chmod 644 {} \;
+
+            # Nginx 적용
             sudo nginx -t && sudo systemctl reload nginx
