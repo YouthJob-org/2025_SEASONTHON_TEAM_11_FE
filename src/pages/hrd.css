@@ -1,0 +1,38 @@
+.hrd { background:#f8fafc; min-height:100vh; }
+.hrd__container { max-width:1120px; margin:0 auto; padding:32px 20px 60px; }
+
+.hrd__title { font-size:32px; font-weight:800; color:#0f172a; margin-bottom:6px; }
+.hrd__subtitle { color:#475569; margin-bottom:20px; }
+
+.hrd__search { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:16px; box-shadow:0 4px 16px rgba(2,6,23,.04); }
+.hrd__row { display:flex; gap:12px; flex-wrap:wrap; }
+.hrd__field { display:flex; flex-direction:column; gap:6px; min-width:180px; }
+.hrd__field label { font-size:12px; color:#64748b; }
+.hrd__field input[type="date"],
+.hrd__field select { height:40px; padding:0 10px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; }
+
+.hrd__actions { display:flex; align-items:flex-end; margin-left:auto; }
+.hrd__btn { height:40px; padding:0 16px; border-radius:999px; background:#024ef2; color:#fff; font-weight:700; border:none; box-shadow:0 6px 16px rgba(2,78,242,.18); cursor:pointer; }
+.hrd__btn:hover { filter:brightness(0.96); }
+
+.hrd__result { margin-top:18px; }
+.hrd__loading, .hrd__error, .hrd__empty { padding:18px; color:#334155; }
+.hrd__error { color:#dc2626; }
+
+.hrd__list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+.hrd__item { display:flex; align-items:stretch; gap:12px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px; }
+.hrd__badge { align-self:flex-start; background:#e0f2fe; color:#0369a1; font-weight:700; font-size:12px; padding:6px 10px; border-radius:999px; }
+.hrd__main { flex:1; }
+.hrd__course { font-size:18px; font-weight:800; color:#0f172a; margin:2px 0 6px; }
+.hrd__meta { color:#475569; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.hrd__sep { color:#cbd5e1; }
+.hrd__submeta { margin-top:8px; display:flex; flex-wrap:wrap; gap:10px; color:#334155; }
+
+.hrd__side { display:flex; align-items:center; }
+.hrd__link { padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; text-decoration:none; cursor:pointer; }
+.hrd__link:hover { background:#f1f5f9; }
+
+.hrd__pagenav { margin-top:16px; display:flex; align-items:center; gap:10px; justify-content:center; }
+.hrd__pagenav button { height:36px; padding:0 14px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; }
+.hrd__pagenav button:disabled { opacity:.5; cursor:not-allowed; }
+.hrd__page { font-weight:700; color:#0f172a; }

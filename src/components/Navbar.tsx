@@ -3,20 +3,35 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./navbar.css";
 
-function decodeJwtSub(bearerToken: string | null): string | null {
+type JwtPayload = { sub?: string; exp?: number; [k: string]: any };
+
+function parseJwt(bearerToken: string | null): JwtPayload | null {
   if (!bearerToken) return null;
-  const token = bearerToken.replace(/^Bearer\s+/, ""); // "Bearer " 제거
+  const token = bearerToken.replace(/^Bearer\s+/, "");
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   try {
-    // URL-safe base64 -> base64
-    const payload = JSON.parse(
-      atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"))
-    );
-    return payload?.sub ?? null; // sub가 이메일
+    let p = parts[1];
+    const rem = p.length % 4;
+    if (rem === 2) p += "==";
+    else if (rem === 3) p += "=";
+    else if (rem !== 0) return null; // rem === 1 같은 비정상은 거절
+
+    const base64 = p.replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(base64));
   } catch {
     return null;
   }
+}
+
+function isExpired(payload: JwtPayload | null) {
+  if (!payload?.exp) return true;
+  return payload.exp * 1000 <= Date.now();
+}
+function clearAuth() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("userEmail");
 }
 
 export default function Navbar() {
@@ -26,40 +41,43 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
+   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // 로그인 상태 동기화: 1) 마운트, 2) 라우트 변경, 3) 다른 탭에서 변경
+  // 마운트/라우트 변경 시 토큰 만료 체크
   useEffect(() => {
-    const emailFromStorage = localStorage.getItem("userEmail");
-    if (emailFromStorage) {
-      setUserEmail(emailFromStorage);
+    const raw = localStorage.getItem("accessToken");
+    const payload = parseJwt(raw);
+    if (!raw || isExpired(payload)) {
+      clearAuth();
+      setUserEmail(null);
       return;
     }
-    const emailFromToken = decodeJwtSub(localStorage.getItem("accessToken"));
-    setUserEmail(emailFromToken);
+    setUserEmail(payload?.sub ?? localStorage.getItem("userEmail"));
   }, [location.pathname]);
 
+  // 다른 탭 변경 동기화 + 만료 체크
   useEffect(() => {
     const onStorage = () => {
-      const emailFromStorage = localStorage.getItem("userEmail");
-      const email =
-        emailFromStorage ??
-        decodeJwtSub(localStorage.getItem("accessToken"));
-      setUserEmail(email);
+      const raw = localStorage.getItem("accessToken");
+      const payload = parseJwt(raw);
+      if (!raw || isExpired(payload)) {
+        clearAuth();
+        setUserEmail(null);
+      } else {
+        setUserEmail(payload?.sub ?? localStorage.getItem("userEmail"));
+      }
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("userEmail");
+    clearAuth();
     setUserEmail(null);
     navigate("/");
   };
@@ -73,7 +91,7 @@ export default function Navbar() {
         </Link>
 
         <nav className={`yj-nav__menu ${open ? "is-open" : ""}`}>
-          <a href="#">내일배움카드</a>
+          <Link to="/hrd/courses">내일배움카드</Link>
           <a href="#">강소기업</a>
           <a href="#">일자리</a>
           <a href="#">스터디</a>
