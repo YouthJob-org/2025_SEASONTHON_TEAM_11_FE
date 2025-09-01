@@ -1,24 +1,76 @@
+// src/components/Navbar.tsx
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import "./navbar.css";
+
+function decodeJwtSub(bearerToken: string | null): string | null {
+  if (!bearerToken) return null;
+  const token = bearerToken.replace(/^Bearer\s+/, ""); // "Bearer " 제거
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    // URL-safe base64 -> base64
+    const payload = JSON.parse(
+      atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    return payload?.sub ?? null; // sub가 이메일
+  } catch {
+    return null;
+  }
+}
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
-    onScroll(); // 최초 적용
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // 로그인 상태 동기화: 1) 마운트, 2) 라우트 변경, 3) 다른 탭에서 변경
+  useEffect(() => {
+    const emailFromStorage = localStorage.getItem("userEmail");
+    if (emailFromStorage) {
+      setUserEmail(emailFromStorage);
+      return;
+    }
+    const emailFromToken = decodeJwtSub(localStorage.getItem("accessToken"));
+    setUserEmail(emailFromToken);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const onStorage = () => {
+      const emailFromStorage = localStorage.getItem("userEmail");
+      const email =
+        emailFromStorage ??
+        decodeJwtSub(localStorage.getItem("accessToken"));
+      setUserEmail(email);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userEmail");
+    setUserEmail(null);
+    navigate("/");
+  };
+
   return (
     <header className={`yj-nav ${scrolled ? "is-solid" : ""}`}>
       <div className="yj-nav__inner">
-        <a className="yj-nav__brand" href="/">
+        {/* SPA 네비게이션이면 Link가 더 좋아요 */}
+        <Link className="yj-nav__brand" to="/">
           <img src="/Logo.png" alt="YouthJob" className="yj-logo" />
-        </a>
+        </Link>
 
         <nav className={`yj-nav__menu ${open ? "is-open" : ""}`}>
           <a href="#">내일배움카드</a>
@@ -27,12 +79,27 @@ export default function Navbar() {
           <a href="#">스터디</a>
         </nav>
 
-         <div className="yj-nav__right">
-          <a className="yj-nav__link" href="#">로그인</a>
-          {/* 👇 회원가입 버튼을 /signup 경로로 */}
-          <Link className="yj-nav__btn" to="/signup">
-            회원가입
-          </Link>
+        <div className="yj-nav__right">
+          {userEmail ? (
+              <>
+                <span className="yj-nav__welcome">
+                  안녕하세요 <span className="yj-nav__email">{userEmail}</span> 님!
+                </span>
+                <button className="yj-nav__logout" onClick={handleLogout}>
+                  로그아웃
+                </button>
+              </>
+            ) : (
+            <>
+              <Link className="yj-nav__link" to="/login">
+                로그인
+              </Link>
+              <Link className="yj-nav__btn" to="/signup">
+                회원가입
+              </Link>
+            </>
+          )}
+
           <button
             className="yj-nav__hamburger"
             onClick={() => setOpen((v) => !v)}

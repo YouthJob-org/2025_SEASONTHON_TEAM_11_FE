@@ -2,12 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import "./signup.css";
+import "./login.css";
 
-export default function Signup() {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -15,25 +14,18 @@ export default function Signup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
-      setError("비밀번호가 일치하지 않습니다.");
-      return;
-    }
-
     setError("");
     setLoading(true);
 
     try {
-      const res = await fetch("https://youthjob.site/api/v1/auth/signup", {
+      const res = await fetch("https://youthjob.site/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }), // 예시 스펙 그대로
+        body: JSON.stringify({ email, password }),
       });
 
-      // 네트워크/HTTP 레벨 에러 처리
       if (!res.ok) {
-        // 백엔드가 에러도 JSON으로 줄 수 있으니 가능한 한 message 뽑기
-        let serverMsg = "회원가입 실패";
+        let serverMsg = "로그인 실패";
         try {
           const data = await res.json();
           if (data?.message) serverMsg = data.message;
@@ -41,14 +33,17 @@ export default function Signup() {
         throw new Error(serverMsg);
       }
 
-      // 정상 응답 파싱: { status:200, success:true, message:"회원가입 성공" }
       const data = await res.json();
+      if (data?.success && data?.data) {
+        const { accessToken, refreshToken, tokenType } = data.data;
 
-      if (data?.success) {
-        alert(data?.message ?? "회원가입 성공");
-        navigate("/login"); // 성공 시 로그인 화면으로
+        // 토큰 저장 (보통 localStorage 또는 cookie)
+        localStorage.setItem("accessToken", `${tokenType} ${accessToken}`);
+        localStorage.setItem("refreshToken", refreshToken);
+        alert(data.message ?? "로그인 성공");
+        navigate("/"); // 홈 화면으로 이동
       } else {
-        setError(data?.message ?? "회원가입에 실패했습니다.");
+        setError(data?.message ?? "로그인 실패");
       }
     } catch (err: any) {
       setError(err?.message ?? "서버와 통신에 실패했습니다.");
@@ -60,10 +55,10 @@ export default function Signup() {
   return (
     <>
       <Navbar />
-      <main className="signup-page">
-        <div className="signup-box">
-          <h2 className="signup-title">회원가입</h2>
-          <form onSubmit={handleSubmit} className="signup-form">
+      <main className="login-page">
+        <div className="login-box">
+          <h2 className="login-title">로그인</h2>
+          <form onSubmit={handleSubmit} className="login-form">
             <label>
               이메일
               <input
@@ -86,21 +81,10 @@ export default function Signup() {
               />
             </label>
 
-            <label>
-              비밀번호 확인
-              <input
-                type="password"
-                placeholder="비밀번호를 다시 입력하세요"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </label>
+            {error && <p className="login-error">{error}</p>}
 
-            {error && <p className="signup-error">{error}</p>}
-
-            <button type="submit" className="signup-btn" disabled={loading}>
-              {loading ? "처리 중..." : "회원가입"}
+            <button type="submit" className="login-btn" disabled={loading}>
+              {loading ? "로그인 중..." : "로그인"}
             </button>
           </form>
         </div>
