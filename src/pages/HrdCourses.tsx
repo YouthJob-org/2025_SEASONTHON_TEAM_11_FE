@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import "./hrd.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type HrdCourse = {
   title: string;
@@ -14,9 +14,10 @@ type HrdCourse = {
   trainTarget?: string;
   trprId: string;
   trprDegr: string;
-  courseMan?: string | number; // ⬅️ 변경
-  yardMan?: string | number;   // ⬅️ 변경
+  courseMan?: string | number; 
+  yardMan?: string | number; 
   titleLink?: string;
+  torgId?: string;
 };
 
 const AREA_OPTIONS: { value: string; label: string }[] = [
@@ -285,15 +286,25 @@ export default function HrdCourses() {
                 </div>
               </div>
 
-      <div className="hrd__side">
-        {c.titleLink ? (
-          <a className="hrd__link" href={c.titleLink} target="_blank" rel="noreferrer">
-            상세보기
-          </a>
-        ) : (
-          <button className="hrd__link" disabled>상세보기</button>
-        )}
-      </div>
+          <div className="hrd__side">
+            {c.torgId ? (
+              <Link
+                className="hrd__link"
+                to={`/hrd/courses/${c.trprId}/${c.trprDegr}?torgId=${encodeURIComponent(
+                  c.torgId
+                )}`}
+              >
+                상세보기
+              </Link>
+            ) : c.titleLink ? (
+              <a className="hrd__link" href={c.titleLink} target="_blank" rel="noreferrer">
+                상세보기
+              </a>
+            ) : (
+              <button className="hrd__link" disabled>상세보기</button>
+            )}
+    </div>
+
     </li>
   ))}
 </ul>

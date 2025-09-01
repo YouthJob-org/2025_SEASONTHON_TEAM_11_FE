@@ -4,6 +4,7 @@ import App from "./App";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import HrdCourses from "./pages/HrdCourses";
+import HrdCourseDetail from "./pages/HrdCourseDetail";
 
 export default function Root() {
   return (
@@ -13,6 +14,7 @@ export default function Root() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         < Route path="/hrd/courses" element={<HrdCourses />} />
+        <Route path="/hrd/courses/:trprId/:trprDegr" element={<HrdCourseDetail />} />
       </Routes>
     </BrowserRouter>
   );
