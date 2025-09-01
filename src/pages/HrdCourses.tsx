@@ -77,12 +77,7 @@ const SORT_COL_OPTIONS: { value: "1" | "2" | "3" | "4"; label: string }[] = [
 
 const PAGE_SIZE_OPTIONS = [10, 20, 30];
 
-function ymd(date: Date) {
-  const y = date.getFullYear();
-  const m = `${date.getMonth() + 1}`.padStart(2, "0");
-  const d = `${date.getDate()}`.padStart(2, "0");
-  return `${y}${m}${d}`; // yyyymmdd
-}
+
 function ymdInputToParam(v: string) {
   // "yyyy-mm-dd" -> "yyyymmdd"
   return v.replaceAll("-", "");
