@@ -1,0 +1,119 @@
+/* emp.css — EmpPrograms 전용 전체 스타일 */
+
+/* 레이아웃/타이포(기존 hrd.css 내용 이관) */
+.hrd { background:#f8fafc; min-height:100vh; }
+.hrd__container { max-width:1120px; margin:0 auto; padding:32px 20px 60px; }
+
+.hrd__title { font-size:32px; font-weight:800; color:#0f172a; margin-bottom:6px; }
+.hrd__subtitle { color:#475569; margin-bottom:20px; }
+
+.hrd__search { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:16px; box-shadow:0 4px 16px rgba(2,6,23,.04); }
+.hrd__row { display:flex; gap:12px; flex-wrap:wrap; }
+.hrd__field { display:flex; flex-direction:column; gap:6px; min-width:180px; }
+.hrd__field label { font-size:12px; color:#64748b; }
+.hrd__field input[type="date"],
+.hrd__field select { height:40px; padding:0 10px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; }
+
+.hrd__actions { display:flex; align-items:flex-end; margin-left:auto; }
+.hrd__btn { height:40px; padding:0 16px; border-radius:999px; background:#024ef2; color:#fff; font-weight:700; border:none; box-shadow:0 6px 16px rgba(2,78,242,.18); cursor:pointer; }
+.hrd__btn:hover { filter:brightness(0.96); }
+
+.hrd__result { margin-top:18px; }
+.hrd__loading, .hrd__error, .hrd__empty { padding:18px; color:#334155; }
+.hrd__error { color:#dc2626; }
+
+.hrd__list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+
+/* 카드(리스트 아이템) — 여기서부터 emp__* 사용 */
+.emp__item {
+  display:flex;
+  gap:12px;
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:14px;
+  padding:14px;
+
+  /* 후기 패널을 아래로 내리기 위한 핵심 */
+  flex-wrap:wrap;           /* 줄바꿈 허용 */
+  align-items:flex-start;   /* 상단 정렬 */
+}
+.emp__main { flex:1; order:1; min-width:0; }
+
+.hrd__badge { align-self:flex-start; background:#e0f2fe; color:#0369a1; font-weight:700; font-size:12px; padding:6px 10px; border-radius:999px; }
+.hrd__course { font-size:18px; font-weight:800; color:#0f172a; margin:2px 0 6px; }
+.hrd__meta { color:#475569; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.hrd__sep { color:#cbd5e1; }
+.hrd__submeta { margin-top:8px; display:flex; flex-wrap:wrap; gap:10px; color:#334155; }
+
+/* 사이드 버튼 영역 */
+.hrd__side {
+  order:2;
+  margin-left:auto;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.hrd__link { padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; text-decoration:none; cursor:pointer; }
+.hrd__link:hover { background:#f1f5f9; }
+
+/* 블로그 후기 패널 — 기본 닫힘 */
+.hrd__reviews {
+  order:3;              /* 메인/사이드 다음에, 항상 아래로 */
+  flex-basis:100%;      /* 한 줄 전체 차지 (아래로 떨어짐) */
+  width:100%;
+
+  display:block;
+  overflow:hidden;
+  max-height:0;
+  opacity:0;
+  transform:translateY(-4px);
+  transition:
+    max-height .35s ease,
+    opacity .2s ease,
+    transform .35s ease,
+    margin-top .35s ease;
+  border-top:1px solid #eef2f7;
+  margin-top:0;
+  pointer-events:none;
+}
+/* 열림 상태(transition은 항상 렌더링할 때 더 자연스러움) */
+.hrd__reviews.open {
+  max-height:1200px;
+  opacity:1;
+  transform:translateY(0);
+  margin-top:12px;
+  pointer-events:auto;
+}
+
+/* 후기 아이템 */
+.hrd__review { padding:12px 0; border-top:1px solid #eee; }
+.hrd__review:first-child { border-top:0; }
+
+.hrd__review-title {
+  display:block;
+  font-weight:700;
+  line-height:1.35;
+  color:#0f172a;
+  text-decoration:none;
+  margin-bottom:6px;
+  word-break:break-word;
+}
+.hrd__review-title:hover { text-decoration:underline; }
+
+.hrd__review-desc { color:#64748b; font-size:14px; margin-bottom:6px; }
+.hrd__review-meta { color:#94a3b8; font-size:12px; }
+
+.hrd__reviews-loading,
+.hrd__reviews-empty { color:#64748b; padding:10px 0; }
+
+/* 페이지 네비 */
+.hrd__pagenav { margin-top:16px; display:flex; align-items:center; gap:10px; justify-content:center; }
+.hrd__pagenav button { height:36px; padding:0 14px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; }
+.hrd__pagenav button:disabled { opacity:.5; cursor:not-allowed; }
+.hrd__page { font-weight:700; color:#0f172a; }
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .hrd__side { gap:8px; flex-wrap:wrap; }
+}
