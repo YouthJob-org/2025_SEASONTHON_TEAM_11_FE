@@ -25,3 +25,62 @@
 .hd__label { width:110px; color:#64748b; }
 .hd__value { flex:1; color:#0f172a; word-break:break-all; }
 .hd__value.link { color:#1d4ed8; text-decoration:underline; }
+
+.hd__cardhead{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin-bottom:8px;
+}
+
+.hd__bloglist { list-style:none; margin:0; padding:0; }
+.hd__blogitem { padding:12px 0; border-top:1px solid #eef2f7; }
+.hd__blogitem:first-child { border-top:0; }
+
+.hd__blogtitle{
+  display:block; font-weight:700; color:#0f172a; text-decoration:none; margin-bottom:6px;
+  line-height:1.35; word-break:break-word;
+}
+.hd__blogtitle:hover{ text-decoration:underline; }
+
+.hd__blogdesc{ color:#64748b; font-size:14px; margin-bottom:6px; }
+.hd__blogmeta{ color:#94a3b8; font-size:12px; }
+
+.hd__muted{ color:#64748b; padding:8px 0; }
+/* 구분선 정돈 */
+.hd__divider { height:0; border-top:1px solid #eef2f7; margin:16px 0; }
+
+/* 라벨열(110px) 기준으로 블로그 섹션 들여쓰기 */
+.hd__inset { margin-left:30px; }
+@media (max-width:560px){ .hd__inset { margin-left:0; } }
+
+/* 섹션 헤더 */
+.hd__sectionhead {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  margin:4px 0 10px;
+}
+.hd__sectitle { font-size:16px; margin:0; }
+.hd__morelink { font-size:13px; color:#64748b; text-decoration:underline; }
+
+/* 카드형 리스트 */
+.hd__bloglist.cardy { display:flex; flex-direction:column; gap:10px; }
+.cardy__item {
+  border:1px solid #eef2f7; border-radius:12px; padding:12px 14px;
+  transition: background .15s ease, box-shadow .15s ease;
+}
+.cardy__item:hover { background:#f8fafc; box-shadow:0 1px 0 rgba(2,6,23,.03); }
+
+.hd__blogmeta { color:#94a3b8; font-size:12px; }
+
+/* 한 곳으로 합쳐 깔끔하게 */
+.hd__blogdesc{
+  color:#64748b;
+  font-size:14px;
+  margin:0 0 6px;
+
+  /* 줄바꿈 2줄로 말줄임 */
+  display:-webkit-box;           /* 레거시(WebKit/Blink) */
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+
+  line-clamp:2;                  /* 표준 속성(지원 브라우저에서 동작) */
+  overflow:hidden;
+}

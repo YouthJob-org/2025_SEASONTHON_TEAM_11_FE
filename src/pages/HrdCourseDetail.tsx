@@ -6,6 +6,17 @@ import Footer from "../components/Footer";
 import "./hrd-detail.css";
 import KakaoMap from "../components/KakaoMap";
 
+
+// ▼ 추가: 네이버 블로그 응답 타입
+type NaverBlogItem = {
+  title: string;
+  link: string;
+  description: string;
+  bloggername: string;
+  postdate: string; // yyyymmdd
+};
+type NaverBlogResp = { items: NaverBlogItem[] };
+
 // 공통
 function toMoney(v?: string | number) {
   if (v === undefined || v === null || v === "") return "-";
@@ -60,7 +71,6 @@ type Detail = {
   trprChap?: string;
   trprChapTel?: string;
   trprChapEmail?: string;
-  // ✅ 새로 추가
   torgParGrad?: string;   // 평가등급
   filePath?: string;      // 썸네일/로고 파일 URL
   pFileName?: string;     // 파일명
@@ -90,6 +100,11 @@ export default function HrdCourseDetail() {
 
   const stat = useMemo<Stat | undefined>(() => data?.stats?.[0], [data]);
 
+
+  const [blogLoading, setBlogLoading] = useState(false);
+  const [blogError, setBlogError] = useState("");
+  const [blogs, setBlogs] = useState<NaverBlogItem[]>([]);
+  const API_BASE = "https://youthjob.site";
   useEffect(() => {
     if (!trprId || !trprDegr || !torgId) {
       setErr("잘못된 접근입니다.");
@@ -121,7 +136,34 @@ export default function HrdCourseDetail() {
       }
     })();
   }, [trprId, trprDegr, torgId, navigate]);
+useEffect(() => {
+  const org = data?.detail?.inoNm?.trim();
+  const title = data?.detail?.trprNm?.trim();
+  if (!org) { setBlogs([]); return; } // 기관명 없으면 종료
 
+  const q = `${org} ${title ?? ""}`.trim();
+  let aborted = false;
+
+  (async () => {
+    try {
+      setBlogLoading(true);
+      setBlogError("");
+      const res = await fetch(
+        `${API_BASE}/api/v1/naver/blogs?q=${encodeURIComponent(q)}&display=5&sort=sim`,
+        { headers: { ...getAuthHeader() } }
+      );
+      if (!res.ok) throw new Error("블로그 후기를 불러오지 못했습니다.");
+      const json: NaverBlogResp = await res.json();
+      if (!aborted) setBlogs(json.items || []);
+    } catch (e:any) {
+      if (!aborted) setBlogError(e?.message ?? "블로그 검색 오류");
+    } finally {
+      if (!aborted) setBlogLoading(false);
+    }
+  })();
+
+  return () => { aborted = true; };
+}, [data?.detail?.inoNm, data?.detail?.trprNm]);
   const d = data?.detail;
   const period =
     stat?.trStaDt && stat?.trEndDt ? `${stat.trStaDt} ~ ${stat.trEndDt}` : "-";
@@ -172,17 +214,6 @@ export default function HrdCourseDetail() {
                 </div>
 
                 <div className="hd__actions">
-                  {d.filePath && (
-                    <a
-                      className="hd__btn ghost"
-                      href={d.filePath}
-                      target="_blank"
-                      rel="noreferrer"
-                      title={d.pFileName || "썸네일 보기"}
-                    >
-                      썸네일 보기
-                    </a>
-                  )}
                   {d.hpAddr && (
                     <a className="hd__btn ghost" href={d.hpAddr} target="_blank" rel="noreferrer">
                       공식 페이지
@@ -226,6 +257,53 @@ export default function HrdCourseDetail() {
                       <span className="hd__label">교육비</span>
                       <span className="hd__value">{toMoney(d?.perTrco ?? stat?.totTrco)}</span>
                     </div>
+                    <div className="hd__divider" />
+                    {/* --- 훈련기관 블로그 후기 (개요카드 내부, 라벨열에 맞춰 들여쓰기) --- */}
+                        <div className="hd__inset">
+                          <div className="hd__sectionhead">
+                            <h3 className="hd__sectitle">관련 블로그 후기</h3>
+                            {data?.detail?.inoNm && (
+                              <a
+                                className="hd__morelink"
+                                href={`https://search.naver.com/search.naver?where=post&sm=tab_jum&query=${encodeURIComponent(
+                                  `${data.detail.inoNm} ${data.detail.trprNm ?? ""}`.trim()
+                                )}`}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                네이버에서 더보기
+                              </a>
+                            )}
+                          </div>
+
+                          {blogLoading && <div className="hd__muted">불러오는 중…</div>}
+                          {blogError && <div className="hd__error">{blogError}</div>}
+
+                          {!blogLoading && !blogError && blogs.length === 0 && (
+                            <div className="hd__muted">관련 블로그 후기가 없습니다.</div>
+                          )}
+
+                          <ul className="hd__bloglist cardy">
+                            {blogs.map((b, i) => (
+                              <li key={i} className="hd__blogitem cardy__item">
+                                <a
+                                  className="hd__blogtitle"
+                                  href={b.link}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  dangerouslySetInnerHTML={{ __html: b.title }}
+                                />
+                                <div
+                                  className="hd__blogdesc"
+                                  dangerouslySetInnerHTML={{ __html: b.description }}
+                                />
+                                <div className="hd__blogmeta">
+                                  {b.bloggername} · {b.postdate.slice(0,4)}-{b.postdate.slice(4,6)}-{b.postdate.slice(6,8)}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                   </div>
                 </div>
 
@@ -265,6 +343,8 @@ export default function HrdCourseDetail() {
                         </div>
                       )}
                     </div>
+                    <div className="hd__divider" />
+                    
                   </div>
 
                   <div className="hd__card">
@@ -298,6 +378,7 @@ export default function HrdCourseDetail() {
                   )}
                 </div>
               </section>
+              
             </>
           )}
         </div>
