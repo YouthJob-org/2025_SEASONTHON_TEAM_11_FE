@@ -271,11 +271,15 @@ function firstNonEmpty(obj: any, keys: string[], fallback = "-") {
   return fallback;
 }
 function programKey(it: EmpProgram) {
-  return String(
-    it.id ??
-      it.pgmId ??
-      `${it.topOrgCd || ""}/${it.orgCd || ""}/${it.pgmNm || ""}/${it.pgmStdt || ""}`
-  );
+  const pgmId = firstNonEmpty(it, ["pgmId"], "");
+  const top   = firstNonEmpty(it, ["topOrgCd"], "");
+  const org   = firstNonEmpty(it, ["orgCd"], "");
+  const name  = firstNonEmpty(it, ["pgmNm", "title", "name"], "");
+  const sdt   = firstNonEmpty(it, ["pgmStdt", "startDate", "sdt"], "");
+  const edt   = firstNonEmpty(it, ["pgmEddt", "pgmEndt", "endDate", "edt"], "");
+  const url   = firstNonEmpty(it, ["url"], "");
+  // id는 전역 유니크가 아닐 수 있어 포함하지 않음
+  return [pgmId, top, org, name, sdt, edt, url].filter(Boolean).join("|");
 }
 
 function Heart({ active, onClick }: { active: boolean; onClick: () => void }) {
@@ -398,9 +402,13 @@ export default function EmpPrograms() {
   }
 
   const onSearch = () => {
-    setPage(1);
-    setTimeout(() => fetchPrograms(1), 0);
-  };
+  setPage(1);
+
+  setBlogMap({});
+  setBlogOpenKey(null);
+  setTimeout(() => fetchPrograms(1), 0);
+};
+
 
   useEffect(() => {
     fetchPrograms(page);
@@ -472,7 +480,7 @@ export default function EmpPrograms() {
   }
 
   // 한 행 렌더링
-  function Row({ it }: { it: EmpProgram }) {
+  function Row({ it, rowKey }: { it: EmpProgram; rowKey: string }) {
     const title = firstNonEmpty(it, ["pgmNm", "title", "name"]);
     const org = firstNonEmpty(it, ["orgNm", "orgName", "orgCd"]);
     const topOrg = firstNonEmpty(it, ["topOrgNm", "topOrgCd"]);
@@ -483,21 +491,20 @@ export default function EmpPrograms() {
     const dur = firstNonEmpty(it, ["operationTime"], "");
     const place = firstNonEmpty(it, ["openPlcCont"], "");
 
-    const key = programKey(it);
-    const active = !!savedMap[key];
-
-    const isOpen = blogOpenKey === key;
-    const reviews = blogMap[key] ?? [];
+    const cacheKey = programKey(it);              // 캐시(블로그 결과) 키
+    const active = !!savedMap[cacheKey];          // 저장 상태 확인도 캐시 키로
+    const isOpen = blogOpenKey === rowKey;        // 열림 상태는 ‘행’ 고유키로만
+    const reviews = blogMap[cacheKey] ?? [];
 
     const onClickBlogs = async () => {
       if (isOpen) {
-        setBlogOpenKey(null); // 접기
-        return;
-      }
-      setBlogOpenKey(key); // 펼치기
-      if (!blogMap[key]) {
-        await fetchBlogReviews(it, key);
-      }
+      setBlogOpenKey(null);
+      return;
+    }
+        setBlogOpenKey(rowKey);                     // 이 행만 열기
+        if (!blogMap[cacheKey]) {
+        await fetchBlogReviews(it, cacheKey);     // 캐시는 프로그램 키로 저장
+        }
     };
 
     return (
@@ -535,7 +542,7 @@ export default function EmpPrograms() {
             className="hrd__link"
             onClick={onClickBlogs}
             aria-expanded={isOpen}
-            aria-controls={`reviews-${key}`}
+            aria-controls={`reviews-${rowKey}`}
           >
             블로그후기
           </button>
@@ -545,7 +552,7 @@ export default function EmpPrograms() {
         {/* ▼ 블로그 후기 패널 */}
         {isOpen && (
           <div
-                id={`reviews-${key}`}
+                id={`reviews-${rowKey}`}
                 className={`hrd__reviews ${isOpen ? "open" : ""}`}
                 aria-hidden={!isOpen}
                 >
@@ -647,9 +654,10 @@ export default function EmpPrograms() {
 
             {items.length > 0 && (
               <ul className="hrd__list">
-                {items.map((it, idx) => (
-                  <Row key={programKey(it) + "_" + idx} it={it} />
-                ))}
+                {items.map((it, idx) => {
+                const rowKey = `${programKey(it)}__p${page}__i${idx}`;
+                return <Row key={rowKey} it={it} rowKey={rowKey} />;
+                })}
               </ul>
             )}
 
