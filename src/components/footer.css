@@ -1,4 +1,4 @@
-.yj-footer{border-top:1px solid rgba(2,6,23,.06);background:#fff;margin-top:30px}
+.yj-footer{border-top:1px solid rgba(2,6,23,.06);background:#fff;margin-top:30px;padding: 20px 0;}
 .yj-footer__inner{max-width:1120px;margin:0 auto;padding:28px 20px}
 .yj-footer__links{display:flex;gap:16px;margin-bottom:8px}
 .yj-footer__links a{text-decoration:none;color:#475569;font-weight:600}

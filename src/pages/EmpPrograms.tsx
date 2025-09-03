@@ -270,16 +270,26 @@ function firstNonEmpty(obj: any, keys: string[], fallback = "-") {
   }
   return fallback;
 }
-function programKey(it: EmpProgram) {
-  const pgmId = firstNonEmpty(it, ["pgmId"], "");
-  const top   = firstNonEmpty(it, ["topOrgCd"], "");
-  const org   = firstNonEmpty(it, ["orgCd"], "");
-  const name  = firstNonEmpty(it, ["pgmNm", "title", "name"], "");
-  const sdt   = firstNonEmpty(it, ["pgmStdt", "startDate", "sdt"], "");
-  const edt   = firstNonEmpty(it, ["pgmEddt", "pgmEndt", "endDate", "edt"], "");
-  const url   = firstNonEmpty(it, ["url"], "");
-  // id는 전역 유니크가 아닐 수 있어 포함하지 않음
-  return [pgmId, top, org, name, sdt, edt, url].filter(Boolean).join("|");
+function norm(v?: any) {
+  return (v ?? "").toString().replace(/\s+/g, " ").trim();
+}
+function programKey(x: any) {
+  // 1) pgmId가 있으면 그걸로 끝
+  const id = norm(x.pgmId);
+  if (id) return `id:${id}`;
+
+  // 2) 저장 DTO에는 orgNm/pgmNm/pgmEndt 등만 있음 → 공통 필드로 키 구성
+  const org = norm(x.orgNm ?? x.orgName);
+  const name = norm(x.pgmNm ?? x.title ?? x.name);
+  const sub = norm(x.pgmSubNm);
+  const sdt = norm(x.pgmStdt ?? x.startDate ?? x.sdt);
+  const edt = norm(x.pgmEddt ?? x.pgmEndt ?? x.endDate ?? x.edt);
+  const open = norm(x.openTime);
+  const dur  = norm(x.operationTime);
+  const place = norm(x.openPlcCont);
+
+  // 최소한 org + name + 날짜는 들어가게
+  return [org, name, sub, sdt, edt, open, dur, place].join("|");
 }
 
 function Heart({ active, onClick }: { active: boolean; onClick: () => void }) {

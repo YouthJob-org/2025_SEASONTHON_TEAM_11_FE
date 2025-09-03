@@ -40,3 +40,23 @@
 .read-the-docs {
   color: #888;
 }
+
+
+html, body, #root {
+  height: 100%;      /* 전체 화면 높이 */
+  margin: 0;         /* 기본 margin 제거 */
+}
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* 화면 높이 꽉 채우기 */
+}
+
+.app-main {
+  flex: 1; /* 남는 공간 채우기 */
+}
+
+.yj-footer {
+  margin-top: auto; /* 푸터가 항상 아래로 밀리도록 */
+}

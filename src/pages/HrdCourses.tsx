@@ -1,9 +1,11 @@
+// src/pages/HrdCourses.tsx
 import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import "./hrd.css";
-import { Link, useNavigate } from "react-router-dom";
 
+/* ===================== Types ===================== */
 type HrdCourse = {
   title: string;
   subTitle?: string;
@@ -14,13 +16,36 @@ type HrdCourse = {
   trainTarget?: string;
   trprId: string;
   trprDegr: string;
-  courseMan?: string | number; 
-  yardMan?: string | number; 
+  courseMan?: string | number;
+  yardMan?: string | number;
   titleLink?: string;
   torgId?: string;
 };
 
-const AREA_OPTIONS: { value: string; label: string }[] = [
+type ApiResponse<T> = { code?: string | number; message?: string; data?: T };
+
+type SavedCourseDto = {
+  id: number;
+  trprId: string;
+  trprDegr: string;
+  title: string;
+  subTitle?: string;
+  address?: string;
+  telNo?: string;
+  traStartDate?: string;
+  traEndDate?: string;
+  trainTarget?: string;
+  trainTargetCd?: string;
+  ncsCd?: string;
+  courseMan?: string;
+  realMan?: string;
+  yardMan?: string;
+  titleLink?: string;
+  subTitleLink?: string;
+};
+
+/* ===================== Constants ===================== */
+const AREA_OPTIONS = [
   { value: "", label: "전체 지역" },
   { value: "11", label: "서울" },
   { value: "26", label: "부산" },
@@ -39,9 +64,9 @@ const AREA_OPTIONS: { value: string; label: string }[] = [
   { value: "48", label: "경남" },
   { value: "50", label: "제주" },
   { value: "51", label: "강원" },
-];
+] as const;
 
-const NCS1_OPTIONS: { value: string; label: string }[] = [
+const NCS1_OPTIONS = [
   { value: "", label: "전체 직종" },
   { value: "01", label: "사업관리" },
   { value: "02", label: "경영/회계/사무" },
@@ -67,20 +92,21 @@ const NCS1_OPTIONS: { value: string; label: string }[] = [
   { value: "22", label: "인쇄/목재/가구/공예" },
   { value: "23", label: "환경/에너지/안전" },
   { value: "24", label: "농림어업" },
-];
+] as const;
 
-const SORT_COL_OPTIONS: { value: "1" | "2" | "3" | "4"; label: string }[] = [
+const SORT_COL_OPTIONS = [
   { value: "1", label: "훈련기관명" },
   { value: "2", label: "훈련시작일" },
   { value: "3", label: "기관 직종별 취업률" },
   { value: "4", label: "만족도점수" },
-];
+] as const;
 
-const PAGE_SIZE_OPTIONS = [10, 20, 30];
+const PAGE_SIZE_OPTIONS = [10, 20, 30] as const;
 
+const API_BASE = "https://youthjob.site";
 
+/* ===================== Utils ===================== */
 function ymdInputToParam(v: string) {
-  // "yyyy-mm-dd" -> "yyyymmdd"
   return v.replaceAll("-", "");
 }
 function toMoney(v?: string | number) {
@@ -89,31 +115,69 @@ function toMoney(v?: string | number) {
   if (!isFinite(n as number)) return String(v);
   return (n as number).toLocaleString("ko-KR") + "원";
 }
-
-// 토큰을 헤더로 만들어 주는 헬퍼
 function getAuthHeader(): HeadersInit {
-  const raw = localStorage.getItem("accessToken"); // 예: "Bearer eyJ..."
+  const raw = localStorage.getItem("accessToken");
   if (!raw) return {};
-  // 혹시 "Bearer "가 빠져 저장된 경우도 방어
   const value = raw.startsWith("Bearer ") ? raw : `Bearer ${raw}`;
   return { Authorization: value };
 }
+function courseKey(c: { trprId: string; trprDegr: string }) {
+  return `${c.trprId}|${c.trprDegr}`;
+}
+function Heart({ active, onClick }: { active: boolean; onClick: () => void }) {
+  return (
+    <button
+      aria-label={active ? "저장 취소" : "저장"}
+      onClick={onClick}
+      className="hrd__link"
+      title={active ? "저장 취소" : "저장"}
+      style={{
+        display: "inline-flex",
+        gap: 6,
+        alignItems: "center",
+        borderColor: active ? "#ef4444" : undefined,
+        color: active ? "#ef4444" : undefined,
+      }}
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill={active ? "#ef4444" : "none"}
+        stroke={active ? "#ef4444" : "#64748b"}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+      {active ? "저장됨" : "저장"}
+    </button>
+  );
+}
+
+/* ===================== Component ===================== */
 export default function HrdCourses() {
   const navigate = useNavigate();
+
   // 기본 기간: 올해 1월 1일 ~ 오늘
   const now = new Date();
   const startOfYear = useMemo(() => new Date(now.getFullYear(), 0, 1), []);
   const [startDate, setStartDate] = useState(
-    `${startOfYear.getFullYear()}-${String(startOfYear.getMonth() + 1).padStart(2, "0")}-${String(startOfYear.getDate()).padStart(2, "0")}`
+    `${startOfYear.getFullYear()}-${String(startOfYear.getMonth() + 1).padStart(2, "0")}-${String(
+      startOfYear.getDate()
+    ).padStart(2, "0")}`
   );
   const [endDate, setEndDate] = useState(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+      now.getDate()
+    ).padStart(2, "0")}`
   );
 
   const [area1, setArea1] = useState<string>("");
   const [ncs1, setNcs1] = useState<string>("");
   const [sortCol, setSortCol] = useState<"1" | "2" | "3" | "4">("2");
-  const [sort, setSort] = useState<"ASC" | "DESC">("DESC"); // 최신순 기본
+  const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
 
@@ -121,6 +185,31 @@ export default function HrdCourses() {
   const [error, setError] = useState<string>("");
   const [items, setItems] = useState<HrdCourse[]>([]);
 
+  // 저장 상태: trprId|trprDegr -> savedId
+  const [savedMap, setSavedMap] = useState<Record<string, number>>({});
+
+  // 저장 목록 선로딩
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/hrd/saved`, {
+          headers: { ...getAuthHeader() },
+        });
+        if (res.status === 401) return; // 비로그인은 조용히 패스
+        const json: ApiResponse<SavedCourseDto[]> | SavedCourseDto[] = await res.json();
+        const data = Array.isArray(json) ? json : json?.data ?? [];
+        const m: Record<string, number> = {};
+        for (const s of data) {
+          if (s?.trprId && s?.trprDegr && s?.id) m[courseKey(s)] = s.id;
+        }
+        setSavedMap(m);
+      } catch {
+        // ignore
+      }
+    })();
+  }, []);
+
+  // 검색
   const fetchCourses = async () => {
     setLoading(true);
     setError("");
@@ -136,9 +225,10 @@ export default function HrdCourses() {
       if (area1) params.append("area1", area1);
       if (ncs1) params.append("ncs1", ncs1);
 
-      const res = await fetch(`https://youthjob.site/api/v1/hrd/courses?${params.toString()}`,
-    { headers: { ...getAuthHeader() } });
-    if (res.status === 401) {
+      const res = await fetch(`${API_BASE}/api/v1/hrd/courses?${params.toString()}`, {
+        headers: { ...getAuthHeader() },
+      });
+      if (res.status === 401) {
         alert("로그인이 필요합니다.");
         navigate("/login");
         return;
@@ -154,21 +244,85 @@ export default function HrdCourses() {
     }
   };
 
-  // 검색 버튼 눌렀을 때만 조회
   const onSearch = () => {
-    setPage(1); // 조건 바꾸면 1페이지부터
-    // setState 비동기이므로 다음 tick에서 fetch 하도록 setTimeout
+    setPage(1);
     setTimeout(fetchCourses, 0);
   };
 
-  // 페이지 변경 시 자동 조회
   useEffect(() => {
     fetchCourses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, size]);
 
   const canPrev = page > 1;
-  const canNext = items.length === size; // 총 개수 없으니 size와 동일하면 더 있다고 가정
+  const canNext = items.length === size;
+
+  // 저장 토글
+  async function toggleSave(course: HrdCourse) {
+    try {
+      const key = courseKey(course);
+      const savedId = savedMap[key];
+
+      if (savedId) {
+        // 삭제
+        const res = await fetch(`${API_BASE}/api/v1/hrd/saved/${savedId}`, {
+          method: "DELETE",
+          headers: { ...getAuthHeader() },
+        });
+        if (res.status === 401) {
+          alert("로그인이 필요합니다.");
+          navigate("/login");
+          return;
+        }
+        if (!res.ok) throw new Error("삭제 실패");
+        setSavedMap((m) => {
+          const n = { ...m };
+          delete n[key];
+          return n;
+        });
+      } else {
+        // 추가 (SaveCourseRequest 스펙)
+        const body = {
+          trprId: course.trprId,
+          trprDegr: course.trprDegr,
+          title: course.title,
+          subTitle: course.subTitle ?? "",
+          address: course.address ?? "",
+          telNo: course.telNo ?? "",
+          traStartDate: course.traStartDate ?? "",
+          traEndDate: course.traEndDate ?? "",
+          trainTarget: course.trainTarget ?? "",
+          trainTargetCd: "",
+          ncsCd: "",
+          courseMan: String(course.courseMan ?? ""),
+          realMan: "",
+          yardMan: String(course.yardMan ?? ""),
+          titleLink: course.titleLink ?? "",
+          subTitleLink: "",
+        };
+
+        const res = await fetch(`${API_BASE}/api/v1/hrd/saved`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...getAuthHeader() },
+          body: JSON.stringify(body),
+        });
+        if (res.status === 401) {
+          alert("로그인이 필요합니다.");
+          navigate("/login");
+          return;
+        }
+        if (!res.ok) throw new Error("저장 실패");
+
+        const json: ApiResponse<SavedCourseDto> | SavedCourseDto = await res.json();
+        const saved = (json as any)?.data ?? json;
+        if (saved?.id) {
+          setSavedMap((m) => ({ ...m, [key]: saved.id }));
+        }
+      }
+    } catch (e: any) {
+      alert(e?.message ?? "처리에 실패했습니다.");
+    }
+  }
 
   return (
     <>
@@ -183,26 +337,20 @@ export default function HrdCourses() {
             <div className="hrd__row">
               <div className="hrd__field">
                 <label>시작일</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                />
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
               </div>
               <div className="hrd__field">
                 <label>종료일</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
               </div>
 
               <div className="hrd__field">
                 <label>지역</label>
                 <select value={area1} onChange={(e) => setArea1(e.target.value)}>
                   {AREA_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -211,7 +359,9 @@ export default function HrdCourses() {
                 <label>직종(NCS 1차)</label>
                 <select value={ncs1} onChange={(e) => setNcs1(e.target.value)}>
                   {NCS1_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -222,7 +372,9 @@ export default function HrdCourses() {
                 <label>정렬 기준</label>
                 <select value={sortCol} onChange={(e) => setSortCol(e.target.value as any)}>
                   {SORT_COL_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -239,13 +391,17 @@ export default function HrdCourses() {
                 <label>페이지 크기</label>
                 <select value={size} onChange={(e) => setSize(Number(e.target.value))}>
                   {PAGE_SIZE_OPTIONS.map((s) => (
-                    <option key={s} value={s}>{s}개</option>
+                    <option key={s} value={s}>
+                      {s}개
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div className="hrd__actions">
-                <button className="hrd__btn" onClick={onSearch}>검색</button>
+                <button className="hrd__btn" onClick={onSearch}>
+                  검색
+                </button>
               </div>
             </div>
           </section>
@@ -254,67 +410,77 @@ export default function HrdCourses() {
           <section className="hrd__result">
             {loading && <div className="hrd__loading">불러오는 중…</div>}
             {error && <div className="hrd__error">{error}</div>}
-            {!loading && !error && items.length === 0 && (
-              <div className="hrd__empty">검색 결과가 없습니다.</div>
-            )}
+            {!loading && !error && items.length === 0 && <div className="hrd__empty">검색 결과가 없습니다.</div>}
 
-                    <ul className="hrd__list">
-          {items.map((c) => (
-            <li key={`${c.trprId}-${c.trprDegr}`} className="hrd__item">
-              {/* ✅ '모집중/마감' 배지 제거 */}
+            <ul className="hrd__list">
+              {items.map((c) => {
+                const key = courseKey(c);
+                const active = !!savedMap[key];
+                return (
+                  <li key={`${c.trprId}-${c.trprDegr}`} className="hrd__item">
+                    <div className="hrd__main">
+                      <h3 className="hrd__course">{c.title}</h3>
 
-              <div className="hrd__main">
-                <h3 className="hrd__course">{c.title}</h3>
+                      <div className="hrd__meta">
+                        <span className="hrd__org">{c.subTitle}</span>
+                        {c.address && (
+                          <>
+                            <span className="hrd__sep">·</span>
+                            <span>{c.address}</span>
+                          </>
+                        )}
+                        {(c.traStartDate || c.traEndDate) && (
+                          <>
+                            <span className="hrd__sep">·</span>
+                            <span>
+                              {c.traStartDate} ~ {c.traEndDate}
+                            </span>
+                          </>
+                        )}
+                      </div>
 
-                <div className="hrd__meta">
-                  <span className="hrd__org">{c.subTitle}</span>
-                  {c.address && <>
-                    <span className="hrd__sep">·</span>
-                    <span>{c.address}</span>
-                  </>}
-                  {(c.traStartDate || c.traEndDate) && <>
-                    <span className="hrd__sep">·</span>
-                    <span>{c.traStartDate} ~ {c.traEndDate}</span>
-                  </>}
-                </div>
+                      <div className="hrd__submeta">
+                        {c.telNo && <span>연락처: {c.telNo}</span>}
+                        {c.trainTarget && <span>대상: {c.trainTarget}</span>}
+                        {c.courseMan !== undefined && <span>교육비: {toMoney(c.courseMan)}</span>}
+                        {c.yardMan !== undefined && <span>정원: {c.yardMan}</span>}
+                      </div>
+                    </div>
 
-                <div className="hrd__submeta">
-                  {c.telNo && <span>연락처: {c.telNo}</span>}
-                  {c.trainTarget && <span>대상: {c.trainTarget}</span>}
-                  {c.courseMan !== undefined && <span>교육비: {toMoney(c.courseMan)}</span>}
-                  {c.yardMan   !== undefined && <span>정원: {c.yardMan}</span>}
-                </div>
-              </div>
+                    <div className="hrd__side" style={{ display: "flex", gap: 8 }}>
+                      {c.torgId ? (
+                        <Link
+                          className="hrd__link"
+                          to={`/hrd/courses/${c.trprId}/${c.trprDegr}?torgId=${encodeURIComponent(c.torgId)}`}
+                        >
+                          상세보기
+                        </Link>
+                      ) : c.titleLink ? (
+                        <a className="hrd__link" href={c.titleLink} target="_blank" rel="noreferrer">
+                          상세보기
+                        </a>
+                      ) : (
+                        <button className="hrd__link" disabled>
+                          상세보기
+                        </button>
+                      )}
 
-          <div className="hrd__side">
-            {c.torgId ? (
-              <Link
-                className="hrd__link"
-                to={`/hrd/courses/${c.trprId}/${c.trprDegr}?torgId=${encodeURIComponent(
-                  c.torgId
-                )}`}
-              >
-                상세보기
-              </Link>
-            ) : c.titleLink ? (
-              <a className="hrd__link" href={c.titleLink} target="_blank" rel="noreferrer">
-                상세보기
-              </a>
-            ) : (
-              <button className="hrd__link" disabled>상세보기</button>
-            )}
-    </div>
-
-    </li>
-  ))}
-</ul>
-
+                      <Heart active={active} onClick={() => toggleSave(c)} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
 
             {/* 페이지네이션 */}
             <div className="hrd__pagenav">
-              <button disabled={!canPrev} onClick={() => canPrev && setPage((p) => p - 1)}>이전</button>
+              <button disabled={!canPrev} onClick={() => canPrev && setPage((p) => p - 1)}>
+                이전
+              </button>
               <span className="hrd__page">{page}</span>
-              <button disabled={!canNext} onClick={() => canNext && setPage((p) => p + 1)}>다음</button>
+              <button disabled={!canNext} onClick={() => canNext && setPage((p) => p + 1)}>
+                다음
+              </button>
             </div>
           </section>
         </div>
