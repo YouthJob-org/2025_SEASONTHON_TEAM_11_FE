@@ -5,7 +5,7 @@ export default function Hero() {
     <section className="yj-hero">
       <div className="yj-hero__media">
         <video className="yj-hero__video" autoPlay muted loop playsInline poster="/assets/hero.jpg">
-          <source src="/assets/hero.mp4" type="video/mp4" />
+          <source src="/assets/heroV2.mp4" type="video/mp4" />
         </video>
         <div className="yj-hero__overlay" />
       </div>
