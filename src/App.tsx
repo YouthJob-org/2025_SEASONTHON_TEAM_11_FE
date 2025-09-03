@@ -43,6 +43,25 @@ export default function App() {
         </section>
       </main>
       <Footer />
+<a
+  href="https://pf.kakao.com/_dFCDn"
+  target="_blank"
+  rel="noreferrer"
+  style={{
+    position: "fixed",
+    right: 24,
+    bottom: 24,
+    zIndex: 9999,
+    padding: "12px 16px",
+    borderRadius: 999,
+    background: "#FEE500",
+    boxShadow: "0 6px 16px rgba(0,0,0,.15)",
+    color: "#000",
+    fontWeight: 700,
+  }}
+>
+  유스잡 채널 추가
+</a>
     </>
   );
 }

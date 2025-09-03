@@ -6,6 +6,9 @@ import Login from "./pages/Login";
 import HrdCourses from "./pages/HrdCourses";
 import HrdCourseDetail from "./pages/HrdCourseDetail";
 import EmpPrograms from "./pages/EmpPrograms";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
+import Contact from "./pages/Contact";
 
 export default function Root() {
   return (
@@ -17,6 +20,9 @@ export default function Root() {
         < Route path="/hrd/courses" element={<HrdCourses />} />
         <Route path="/hrd/courses/:trprId/:trprDegr" element={<HrdCourseDetail />} />
         <Route path="/emp-programs" element={<EmpPrograms />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </BrowserRouter>
   );
