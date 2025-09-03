@@ -1,0 +1,39 @@
+/* src/pages/page-common.css */
+
+/* 본문 래퍼: 폭만 제어 */
+.yj-page {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+/* 제목/본문 타이포 */
+.yj-page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+.yj-page h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 24px 0 12px;
+}
+.yj-page p {
+  margin: 0 0 16px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+/* 리스트 */
+.yj-page ul { padding-left: 20px; margin: 0 0 16px; }
+.yj-page li { margin-bottom: 8px; line-height: 1.6; }
+
+/* 페이지 마지막 요소 아래 여백 제거 (푸터와 간격 최소화) */
+.yj-page > *:last-child { margin-bottom: 0 !important; }
+
+/* 본문 영역: 흰 배경이 푸터까지 이어지도록, 아래 패딩 최소화 */
+.yj-main {
+  flex: 1;
+  background: #fff;
+  padding: 40px 20px 8px;  /* ⬅︎ bottom을 작게 */
+  margin: 0;
+}
