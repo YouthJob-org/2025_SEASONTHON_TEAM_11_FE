@@ -70,3 +70,30 @@
   .yj-nav__menu.is-open{display:flex}
   .yj-nav__hamburger{display:inline-block}
 }
+/* --- MyPage 칩 버튼 --- */
+.yj-nav__mypage{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 14px;
+  border-radius:999px;
+  background:#ffffff;
+  color:#0f172a;
+  font-weight:700;
+  text-decoration:none;
+  border:1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(2,6,23,.06);
+  transition: color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+.yj-nav__mypage:hover{
+  background: rgba(2,78,242,.06);
+  color:#024ef2;
+  border-color:#cfe0ff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(2,6,23,.10);
+}
+.yj-nav__mypage:active{
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(2,6,23,.06);
+}
+.yj-nav__mypage svg{
+  width:18px; height:18px; flex:0 0 18px;
+}

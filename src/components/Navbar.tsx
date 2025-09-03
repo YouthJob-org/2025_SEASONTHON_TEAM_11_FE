@@ -94,7 +94,6 @@ export default function Navbar() {
           <Link to="/hrd/courses">내일배움카드</Link>
           <Link to="/emp-programs">취업역량 프로그램</Link>
           <a href="#">일자리</a>
-          <a href="#">스터디</a>
         </nav>
 
         <div className="yj-nav__right">
@@ -103,6 +102,17 @@ export default function Navbar() {
                 <span className="yj-nav__welcome">
                   안녕하세요 <span className="yj-nav__email">{userEmail}</span> 님!
                 </span>
+ <Link className="yj-nav__mypage" to="/mypage" aria-label="마이페이지">
+        <svg
+          width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        마이페이지
+      </Link>
                 <button className="yj-nav__logout" onClick={handleLogout}>
                   로그아웃
                 </button>
