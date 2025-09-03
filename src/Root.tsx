@@ -9,6 +9,7 @@ import EmpPrograms from "./pages/EmpPrograms";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import Contact from "./pages/Contact";
+import MyPage from "./pages/MyPage"; 
 
 export default function Root() {
   return (
@@ -23,6 +24,7 @@ export default function Root() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/mypage" element={<MyPage />} />
       </Routes>
     </BrowserRouter>
   );
