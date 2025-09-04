@@ -38,7 +38,7 @@ export default function Steps() {
             <button className="yj-step-chip">저장하기</button>
             <span className="yj-step-arrow" aria-hidden />
             <div className="yj-step-bubble">
-              관심 있는 교육·기업·정책은 <b>My Page</b>에 모아두기
+              관심 있는 교육·정책은 <b>My Page</b>에 모아두기
             </div>
           </div>
           {/* 3 */}
@@ -46,15 +46,15 @@ export default function Steps() {
             <button className="yj-step-chip">신청하기</button>
             <span className="yj-step-arrow" aria-hidden />
             <div className="yj-step-bubble">
-              내일배움카드 발급, 프로그램 참여, 정책 지원을 바로 신청
+              내일배움카드 발급, 프로그램 참여, 정책 지원
             </div>
           </div>
           {/* 4 */}
           <div className="yj-step-row">
-            <button className="yj-step-chip">관리하기</button>
+            <button className="yj-step-chip">나의 첫 커리어 시작</button>
             <span className="yj-step-arrow" aria-hidden />
             <div className="yj-step-bubble">
-              지원 현황, 마감 일정, 스터디 계획까지 한눈에 관리
+              유스잡과 함께 커리어 시작!
             </div>
           </div>
         </div>
