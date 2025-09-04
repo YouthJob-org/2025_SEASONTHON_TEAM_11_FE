@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import Steps from "./components/Steps";
 import Stats from "./components/Stats";
 import CardTabs from "./components/CardTabs";
+import ChatFloat from "./components/ChatFloat"; 
 import "./global.css";
 
 export default function App() {
@@ -21,7 +22,7 @@ export default function App() {
       </main>
 
       <Footer /> {/* ✅ margin-top:auto; 덕분에 하단으로 밀림 */}
-
+      <ChatFloat />
       {/* 플로팅 버튼은 레이아웃 밖에 둬도 됨 */}
       <a
         href="https://pf.kakao.com/_dFCDn"

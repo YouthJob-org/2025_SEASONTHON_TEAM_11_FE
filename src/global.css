@@ -114,3 +114,144 @@ html, body, #root {
 .yj-footer {
   margin-top: auto; /* 중요 */
 }
+
+/* ===== Floating Chat Panel (모바일 프레임) ===== */
+.yj-chat-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 96px; /* 챗봇/Kakao 버튼 위로 살짝 띄우기 */
+  width: 360px;           /* 모바일 폭 */
+  max-width: calc(100vw - 48px);
+  height: 600px;          /* 모바일 높이 느낌 */
+  max-height: calc(100vh - 160px);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(0,0,0,.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10000;
+  animation: yj-pop .15s ease-out;
+}
+
+@keyframes yj-pop {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.yj-chat-head {
+  height: 52px;
+  background: linear-gradient(90deg, #0351fa, #0268f6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 16px;
+}
+
+.yj-chat-title {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+}
+
+.yj-chat-x {
+  margin-left: auto;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  color: #fff;
+  border: 0; background: transparent;
+  font-size: 22px;
+  line-height: 22px;
+  cursor: pointer;
+}
+
+.yj-chat-x:hover { background: rgba(5, 65, 230, 0.12); }
+
+.yj-chat-body {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  background:
+    radial-gradient(1200px 300px at 80% -100px, rgba(255,220,64,.12), transparent 60%),
+    #f8fafc;
+}
+
+.yj-bubble {
+  max-width: 85%;
+  padding: 10px 12px;
+  margin: 6px 0;
+  border-radius: 16px;
+  line-height: 1.5;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.yj-bubble.bot {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #000000;
+}
+
+.yj-bubble.me {
+  margin-left: auto;
+  background: #0351fa;
+  color: #fff;
+}
+
+.yj-line { margin: 2px 0; }
+
+.yj-typing {
+  margin: 8px 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.yj-chat-input {
+  border-top: 1px solid #e5e7eb;
+  padding: 8px;
+  display: flex;
+  gap: 8px;
+  background: #fff;
+}
+
+.yj-chat-input textarea {
+  flex: 1;
+  resize: none;
+  border: 1px solid #0253f5f2;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  max-height: 160px;
+  outline: none;
+}
+
+.yj-chat-input textarea:focus {
+  border-color: #111827;
+}
+
+.yj-chat-input button {
+  flex: 0 0 auto;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 0;
+  background: #020eff;
+  color: #f8f8f8;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.yj-chat-input button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* 작은 화면에서 패널 폭/높이 자동 조정 */
+@media (max-width: 420px) {
+  .yj-chat-panel {
+    right: 16px;
+    left: 16px;
+    width: auto;
+    height: 60vh;
+  }
+}
