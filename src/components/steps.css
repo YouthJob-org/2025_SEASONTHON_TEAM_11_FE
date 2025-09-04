@@ -1,0 +1,47 @@
+.yj-section--alt { background: #f5f7fb; }
+
+.yj-steps__title {
+  font-size: 28px; font-weight: 800; letter-spacing: -0.02em;
+}
+.yj-steps__badge { font-weight: 800; }
+.yj-steps__subtitle {
+  margin-top: 8px; color: #6b7280;
+}
+
+.yj-steps__rows { margin-top: 28px; display: grid; gap: 18px; }
+.yj-step-row {
+  display: grid;
+  grid-template-columns: 140px 1fr max-content;
+  align-items: center;
+  gap: 16px;
+}
+.yj-step-chip {
+  background: #0b5cff; color: #fff; border: 0; border-radius: 999px;
+  padding: 14px 18px; font-weight: 700; box-shadow: 0 8px 18px rgba(11,92,255,.25);
+}
+.yj-step-arrow {
+  height: 2px; background: #cfd6e4; position: relative;
+}
+.yj-step-arrow::after {
+  content: ""; position: absolute; right: -6px; top: -4px;
+  width: 10px; height: 10px; border-top: 2px solid #cfd6e4; border-right: 2px solid #cfd6e4; transform: rotate(45deg);
+}
+.yj-step-bubble {
+  background: #eceff3; color: #111827; border-radius: 999px;
+  padding: 18px 22px; font-weight: 600; white-space: nowrap;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+  .yj-step-row {
+    grid-template-columns: 120px 1fr;
+    grid-template-areas:
+      "chip bubble";
+  }
+  .yj-step-arrow { display: none; }
+  .yj-step-bubble { white-space: normal; border-radius: 16px; }
+}
+
+/* 스크롤 리빌 공통 */
+.yj-reveal { opacity: 0; transform: translateY(24px); transition: all .6s ease; }
+.yj-reveal.is-visible { opacity: 1; transform: translateY(0); }
