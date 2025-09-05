@@ -8,6 +8,7 @@ import Stats from "./components/Stats";
 import CardTabs from "./components/CardTabs";
 import ChatFloat from "./components/ChatFloat";
 import { prefetchPoliciesAllSilent } from "./utils/policiesPrefetch";
+import FabSpeedDial from "./components/FabSpeedDial";
 import "./global.css";
 
 export default function App() {
@@ -29,25 +30,7 @@ export default function App() {
       <Footer /> {/* ✅ margin-top:auto; 덕분에 하단으로 밀림 */}
       <ChatFloat />
       {/* 플로팅 버튼은 레이아웃 밖에 둬도 됨 */}
-      <a
-        href="https://pf.kakao.com/_dFCDn"
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          position: "fixed",
-          right: 24,
-          bottom: 24,
-          zIndex: 9999,
-          padding: "12px 16px",
-          borderRadius: 999,
-          background: "#FEE500",
-          boxShadow: "0 6px 16px rgba(0,0,0,.15)",
-          color: "#000",
-          fontWeight: 700,
-        }}
-      >
-        유스잡 채널 추가
-      </a>
+    <FabSpeedDial />
     </div>
   );
 }
