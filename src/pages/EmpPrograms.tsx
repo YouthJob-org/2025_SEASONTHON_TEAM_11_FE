@@ -940,8 +940,13 @@ export default function EmpPrograms() {
             {loading && <div className="hrd__loading">불러오는 중…</div>}
             {error && <div className="hrd__error">{error}</div>}
             {!loading && !error && (items?.length ?? 0) === 0 && (
-              <div className="hrd__empty">검색 결과가 없습니다.</div>
-            )}
+  <div className="hrd__empty">
+    검색 결과가 없습니다.
+    <div className="hrd__empty-hint">
+      시작일을 휴일(공휴일)로 설정할 경우 검색결과가 없을 수 있습니다.
+    </div>
+  </div>
+)}
 
             {items.length > 0 && (
               <ul className="hrd__list">
