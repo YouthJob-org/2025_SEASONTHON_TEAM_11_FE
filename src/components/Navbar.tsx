@@ -93,6 +93,7 @@ export default function Navbar() {
         <nav className={`yj-nav__menu ${open ? "is-open" : ""}`}>
           <Link to="/hrd/courses">내일배움카드</Link>
           <Link to="/emp-programs">취업역량 프로그램</Link>
+          <Link to="/youth-policies">청년정책</Link>
           <a href="#">일자리</a>
         </nav>
 

@@ -1,17 +1,24 @@
 // src/App.tsx
+import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Footer from "./components/Footer";
 import "./global.css";
+import { startPoliciesPrefetch } from "./utils/policiesPrefetch"; // ✅ 추가
 
 export default function App() {
+  // ✅ 홈 진입 즉시 4,096개 전부 백그라운드로 캐시에 적재
+  useEffect(() => {
+    const stop = startPoliciesPrefetch();
+    return stop; // 언마운트 시 중단
+  }, []);
+
   return (
-    <div className="app-layout">{/* ✅ 세로 플렉스 래퍼 */}
+    <div className="app-layout">
       <Navbar />
-
-      <main className="app-main">{/* ✅ 남은 공간 모두 차지 */}
+      <main className="app-main">
         <Hero />
-
+        {/* ... 이하 동일 ... */}
         <section className="yj-section yj-section--cards">
           <div className="yj-container yj-cards">
             <article className="yj-card">
@@ -21,15 +28,13 @@ export default function App() {
               <h3 className="yj-card__title">내일배움카드</h3>
               <p className="yj-card__desc">국비 지원으로 배우는 직무·자격 교육</p>
             </article>
-
             <article className="yj-card">
               <div className="yj-card__icon">
                 <img src="/assets/building.png" alt="강소기업" />
               </div>
-              <h3 className="yj-card__title">강소기업</h3>
+              <h3 className="yj-card__title">취업역량강화프로그램</h3>
               <p className="yj-card__desc">청년 친화적 우수 중소기업 정보</p>
             </article>
-
             <article className="yj-card">
               <div className="yj-card__icon">
                 <img src="/assets/policy.png" alt="청년지원정책" />
@@ -46,10 +51,8 @@ export default function App() {
           </div>
         </section>
       </main>
+      <Footer />
 
-      <Footer /> {/* ✅ margin-top:auto; 덕분에 하단으로 밀림 */}
-
-      {/* 플로팅 버튼은 레이아웃 밖에 둬도 됨 */}
       <a
         href="https://pf.kakao.com/_dFCDn"
         target="_blank"

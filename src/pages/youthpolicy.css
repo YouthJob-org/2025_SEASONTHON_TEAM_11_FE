@@ -1,0 +1,146 @@
+/* 레이아웃 */
+.yp { background:#f8fafc; min-height:100vh; }
+.yp__container { max-width:1120px; margin:0 auto; padding:32px 20px 60px; }
+.yp__title { font-size:32px; font-weight:800; color:#0f172a; margin-bottom:6px; }
+.yp__subtitle { color:#475569; margin-bottom:20px; }
+
+/* 검색바 */
+.yp__search { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:16px; box-shadow:0 4px 16px rgba(2,6,23,.04); }
+.yp__row { display:flex; gap:12px; flex-wrap:wrap; }
+.yp__field { display:flex; flex-direction:column; gap:6px; min-width:180px; }
+.yp__field label { font-size:12px; color:#64748b; }
+.yp__field input[type="text"],
+.yp__field select { height:40px; padding:0 10px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; }
+.yp__actions { display:flex; align-items:flex-end; margin-left:auto; }
+.yp__btn { height:40px; padding:0 16px; border-radius:999px; background:#024ef2; color:#fff; font-weight:700; border:none; box-shadow:0 6px 16px rgba(2,78,242,.18); cursor:pointer; }
+.yp__btn:hover { filter:brightness(0.96); }
+
+/* 결과 리스트 */
+.yp__result { margin-top:18px; }
+.yp__loading, .yp__error, .yp__empty { padding:18px; color:#334155; }
+.yp__error { color:#dc2626; }
+
+.yp__grid { list-style:none; padding:0; margin:0; display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+@media (max-width: 980px) { .yp__grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .yp__grid { grid-template-columns: 1fr; } }
+
+.yp__card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px; box-shadow:0 4px 16px rgba(2,6,23,.04); display:flex; flex-direction:column; gap:10px; }
+.yp__card_head { display:flex; justify-content:space-between; align-items:center; }
+.yp__badge { background:#e0f2fe; color:#0369a1; font-weight:700; font-size:12px; padding:6px 10px; border-radius:999px; }
+.yp__title_sm { font-size:18px; font-weight:800; color:#0f172a; margin:2px 0 6px; }
+
+/* 반응형 요약: 화면폭이 줄면 더 많은 줄을 보여줌 (줄바꿈 유지) */
+.yp__summary {
+  color:#334155;
+  line-height:1.45;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:3; /* 기본 3줄 */
+}
+@media (max-width: 980px) {
+  .yp__summary { -webkit-line-clamp:4; }
+}
+@media (max-width: 640px) {
+  .yp__summary { -webkit-line-clamp:6; }
+}
+
+.yp__meta { display:flex; flex-wrap:wrap; gap:8px; color:#475569; }
+.yp__meta_item { font-size:13px; }
+.yp__card_foot { margin-top:auto; display:flex; justify-content:flex-end; }
+.yp__link { padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; text-decoration:none; cursor:pointer; }
+.yp__link:hover { background:#f1f5f9; }
+
+/* 하트 버튼 */
+.yp__heart { width:36px; height:36px; border-radius:50%; border:1px solid #e2e8f0; background:#fff; display:grid; place-items:center; cursor:pointer; box-shadow:0 2px 8px rgba(2,6,23,.05); }
+.yp__heart_shape { width:18px; height:18px; mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21s-6.716-4.43-9.2-7.2C.72 11.54.4 8.5 2.5 6.6 4.1 5.2 6.7 5.4 8 6.8c.9 1 2 2.2 4 4 2-1.8 3.1-3 4-4 1.3-1.4 3.9-1.6 5.5 0 2.1 1.9 1.8 4.94-.3 7.2C18.716 16.57 12 21 12 21z"/></svg>') center / contain no-repeat; background:#cbd5e1; }
+.yp__heart.is-on .yp__heart_shape { background:#ef4444; }
+
+/* 페이지네이션 */
+.yp__pagenav { margin-top:16px; display:flex; align-items:center; gap:10px; justify-content:center; }
+.yp__pagenav button { height:36px; padding:0 14px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; }
+.yp__pagenav button:disabled { opacity:.5; cursor:not-allowed; }
+.yp__page { font-weight:700; color:#0f172a; }
+
+/* ───────────────────── 상세 페이지 ───────────────────── */
+.yp__detail {
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  padding:24px;
+  box-shadow:0 4px 16px rgba(2,6,23,.06);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.yp__detail .yp__badge { align-self:flex-start; }
+.yp__detail_body {
+  font-size:15px;
+  line-height:1.6;
+  color:#334155;
+  white-space:pre-line; /* 줄바꿈 유지 */
+}
+
+/* 기존 CSS는 유지하고 아래만 추가 */
+
+.yp__card.is-clickable {
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, border-color .12s ease;
+}
+
+.yp__card.is-clickable:hover {
+  transform: translateY(-1px);
+  background: #f9fbff;
+  border-color: #dbe3f0;
+  box-shadow: 0 6px 20px rgba(2, 6, 23, .08);
+}
+
+.yp__card.is-clickable:active {
+  transform: translateY(0);
+  background: #f3f7ff;
+  box-shadow: 0 4px 14px rgba(2, 6, 23, .06);
+}
+
+.yp__card.is-clickable:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(2, 78, 242, .25);
+}
+
+/* youthpolicy.css에 추가 */
+.yp__card--clickable { cursor: pointer; transition: transform .08s ease, background-color .12s ease, box-shadow .12s ease; }
+.yp__card--clickable:hover { background:#f9fbff; transform: translateY(-1px); box-shadow:0 8px 24px rgba(2,6,23,.06); }
+
+/* 상세 레이아웃 */
+.yp__detail {
+  background:#fff; border:1px solid #e2e8f0; border-radius:16px;
+  padding:24px; box-shadow:0 8px 24px rgba(2,6,23,.05);
+}
+.yp__section { margin-top:20px; }
+.yp__section_t { font-size:16px; font-weight:800; color:#0f172a; margin-bottom:10px; }
+.yp__section_p { color:#334155; line-height:1.6; white-space:pre-wrap; }
+
+/* 키워드 칩 */
+.yp__chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.yp__chip {
+  padding:4px 10px; border-radius:999px; background:#f1f5f9; color:#0f172a;
+  font-size:12px; font-weight:700; border:1px solid #e2e8f0;
+}
+
+/* 정보표 (dt/dd) */
+.yp__dl {
+  display:grid;
+  grid-template-columns: 120px 1fr;
+  gap:8px 16px;
+  align-items:flex-start;
+  color:#334155;
+}
+.yp__dl dt { font-weight:700; color:#0f172a; }
+.yp__dl dd { margin:0; }
+
+/* 링크 리스트 */
+.yp__links { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
+.yp__a { color:#024ef2; text-decoration:none; word-break:break-all; }
+.yp__a:hover { text-decoration:underline; }
+
+/* 상세 액션 */
+.yp__detail_actions { margin-top:22px; display:flex; gap:10px; }
