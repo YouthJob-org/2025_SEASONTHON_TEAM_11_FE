@@ -1,5 +1,5 @@
 // src/components/ChatFloat.tsx
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./chatbot.css";
 
 type Msg = { role: "user" | "bot"; text: string; at: number };
