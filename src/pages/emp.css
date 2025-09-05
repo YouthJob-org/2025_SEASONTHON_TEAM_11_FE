@@ -24,60 +24,94 @@
 
 .hrd__list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
 
-/* 카드(리스트 아이템) — 여기서부터 emp__* 사용 */
-.emp__item {
-  display:flex;
-  gap:12px;
+/* ============ 카드 레이아웃(썸네일 없음, HRD 스타일) ============ */
+.emp__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
   background:#fff;
   border:1px solid #e2e8f0;
-  border-radius:14px;
-  padding:14px;
-
-  /* 후기 패널을 아래로 내리기 위한 핵심 */
-  flex-wrap:wrap;           /* 줄바꿈 허용 */
-  align-items:flex-start;   /* 상단 정렬 */
+  border-radius:16px;
+  padding:12px 14px 12px;
+  box-shadow:0 6px 18px rgba(2,6,23,.04);
 }
-.emp__main { flex:1; order:1; min-width:0; }
 
-.hrd__badge { align-self:flex-start; background:#e0f2fe; color:#0369a1; font-weight:700; font-size:12px; padding:6px 10px; border-radius:999px; }
-.hrd__course { font-size:18px; font-weight:800; color:#0f172a; margin:2px 0 6px; }
-.hrd__meta { color:#475569; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-.hrd__sep { color:#cbd5e1; }
-.hrd__submeta { margin-top:8px; display:flex; flex-wrap:wrap; gap:10px; color:#334155; }
-
-/* 사이드 버튼 영역 */
-.hrd__side {
-  order:2;
-  margin-left:auto;
-  flex:0 0 auto;
-  display:flex;
-  align-items:center;
-  gap:8px;
+/* 우상단 하트(저장) — HRD와 동일 톤 */
+.emp__fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px; height: 32px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #94a3b8;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
 }
-.hrd__link { padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; text-decoration:none; cursor:pointer; }
+.emp__fav:hover { background:#f8fafc; }
+.emp__fav.is-active { color:#ef4444; border-color:#fecaca; background:#fff; }
+
+/* 본문 타이포(제목 22px로 HRD 카드와 동일) */
+.emp__card-main { display:flex; flex-direction:column; gap:8px; }
+.emp__card-head { display:flex; flex-direction:column; gap:2px; }
+.emp__card-title { font-size:22px; font-weight:800; color:#0f172a; margin:0; }
+.emp__card-sub { color:#64748b; font-weight:600; font-size:13px; }
+.emp__card-desc { margin:0; color:#334155; }
+
+/* 메타 줄 */
+.emp__meta-row { display:flex; gap:18px; flex-wrap:wrap; color:#475569; font-size:14px; line-height:1.6; }
+.emp__meta { position:relative; display:inline-flex; align-items:center; gap:6px; }
+
+/* 우하단 액션(블로그 후기 / 신청하기) */
+.emp__card-actions {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-self: flex-end;
+}
+/* 기본 버튼: 흰색 */
+.hrd__link {
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid #cbd5e1;
+  background:#fff;
+  color:#0f172a;
+  text-decoration:none;
+  cursor:pointer;
+  font-weight:600;
+}
 .hrd__link:hover { background:#f1f5f9; }
+
+/* 파란색 버튼: 센터홈 전용 */
+.hrd__link.btn--primary {
+  border-color:#024ef2;
+  background:#024ef2;
+  color:#fff;
+}
+.hrd__link.btn--primary:hover {
+  background:#003cd1;
+  border-color:#003cd1;
+}
+
+
 
 /* 블로그 후기 패널 — 기본 닫힘 */
 .hrd__reviews {
-  order:3;              /* 메인/사이드 다음에, 항상 아래로 */
-  flex-basis:100%;      /* 한 줄 전체 차지 (아래로 떨어짐) */
+  flex-basis:100%;
   width:100%;
-
   display:block;
   overflow:hidden;
   max-height:0;
   opacity:0;
   transform:translateY(-4px);
-  transition:
-    max-height .35s ease,
-    opacity .2s ease,
-    transform .35s ease,
-    margin-top .35s ease;
+  transition:max-height .35s ease, opacity .2s ease, transform .35s ease, margin-top .35s ease;
   border-top:1px solid #eef2f7;
   margin-top:0;
   pointer-events:none;
 }
-/* 열림 상태(transition은 항상 렌더링할 때 더 자연스러움) */
 .hrd__reviews.open {
   max-height:1200px;
   opacity:1;
@@ -89,23 +123,11 @@
 /* 후기 아이템 */
 .hrd__review { padding:12px 0; border-top:1px solid #eee; }
 .hrd__review:first-child { border-top:0; }
-
-.hrd__review-title {
-  display:block;
-  font-weight:700;
-  line-height:1.35;
-  color:#0f172a;
-  text-decoration:none;
-  margin-bottom:6px;
-  word-break:break-word;
-}
+.hrd__review-title { display:block; font-weight:700; line-height:1.35; color:#0f172a; text-decoration:none; margin-bottom:6px; word-break:break-word; }
 .hrd__review-title:hover { text-decoration:underline; }
-
 .hrd__review-desc { color:#64748b; font-size:14px; margin-bottom:6px; }
 .hrd__review-meta { color:#94a3b8; font-size:12px; }
-
-.hrd__reviews-loading,
-.hrd__reviews-empty { color:#64748b; padding:10px 0; }
+.hrd__reviews-loading, .hrd__reviews-empty { color:#64748b; padding:10px 0; }
 
 /* 페이지 네비 */
 .hrd__pagenav { margin-top:16px; display:flex; align-items:center; gap:10px; justify-content:center; }
@@ -115,5 +137,5 @@
 
 /* 반응형 */
 @media (max-width: 768px) {
-  .hrd__side { gap:8px; flex-wrap:wrap; }
+  .hrd__row { gap:10px; }
 }

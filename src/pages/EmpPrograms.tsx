@@ -344,7 +344,7 @@ const WORK_CENTER_SLUGS: Record<string, string> = {
 
 /** 센터명 → slug (코드 없을 때 보조) */
 const NAME_TO_WORK_SLUG: Record<string, string> = {
-  // 서울
+  // (생략 없이 그대로 유지)
   "서울동부": "seouldongbu",
   "서울서부": "seoulseobu",
   "서울남부": "seoulnambu",
@@ -355,7 +355,6 @@ const NAME_TO_WORK_SLUG: Record<string, string> = {
   "성동광진": "seongdonggwangjin",
   "강북성북": "gangbukseongbuk",
   "서울": "seoul",
-  // 광역·기초 (일부)
   "부산": "busan",
   "부산사하": "busansaha",
   "부산동부": "busandongbu",
@@ -560,35 +559,31 @@ function programKey(x: any) {
   return [org, name, sub, sdt, edt, open, dur, place].join("|");
 }
 
-// 좋아요(저장) 버튼
+// 좋아요(저장) 버튼 (상단 우측 원형 하트)
 function Heart({ active, onClick }: { active: boolean; onClick: () => void }) {
   return (
     <button
       aria-label={active ? "저장 취소" : "저장"}
       onClick={onClick}
-      className="hrd__link"
+      className={`emp__fav ${active ? "is-active" : ""}`}
       title={active ? "저장 취소" : "저장"}
-      style={{
-        display: "inline-flex",
-        gap: 6,
-        alignItems: "center",
-        borderColor: active ? "#ef4444" : undefined,
-        color: active ? "#ef4444" : undefined,
-      }}
     >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill={active ? "#ef4444" : "none"}
-        stroke={active ? "#ef4444" : "#64748b"}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-      </svg>
-      {active ? "저장됨" : "저장"}
+        <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill={active ? "#ef4444" : "none"}
+    stroke={active ? "#ef4444" : "#64748b"}
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 
+             5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 
+             5.5 0 0 0 0-7.78z"></path>
+  </svg>
+
     </button>
   );
 }
@@ -752,6 +747,9 @@ export default function EmpPrograms() {
     }
   }
 
+  // ─────────────────────────────────────────────────────────────
+  // 카드형 Row (스크린샷 레이아웃)
+  // ─────────────────────────────────────────────────────────────
   function Row({ it, rowKey }: { it: EmpProgram; rowKey: string }) {
     const title = firstNonEmpty(it, ["pgmNm", "title", "name"]);
     const org = firstNonEmpty(it, ["orgNm", "orgName", "orgCd"]);
@@ -768,7 +766,7 @@ export default function EmpPrograms() {
     const isOpen = blogOpenKey === rowKey;
     const reviews = blogMap[cacheKey] ?? [];
 
-    const centerUrl = getCenterUrlFromItem(it); // ✅ 한 개 인자만
+    const centerUrl = getCenterUrlFromItem(it);
 
     const onClickBlogs = async () => {
       if (isOpen) {
@@ -782,103 +780,100 @@ export default function EmpPrograms() {
     };
 
     return (
-      <li className="emp__item">
-        <div className="emp__main">
-          <h3 className="hrd__course">{title}</h3>
-          {sub && <div className="hrd__desc" style={{ color: "#64748b" }}>{sub}</div>}
+      <li className="emp__card">
+        {/* 우상단 하트 */}
+        <Heart active={active} onClick={() => onToggleSave(it)} />
 
-          <div className="hrd__meta">
-            <span className="hrd__org">{org}</span>
-            {topOrg && topOrg !== "-" && (
-              <>
-                <span className="hrd__sep">·</span>
-                <span>{topOrg}</span>
-              </>
-            )}
+        {/* 본문 */}
+        <div className="emp__card-main">
+          <div className="emp__card-head">
+            <h3 className="emp__card-title">{title}</h3>
+            <span className="emp__card-sub">{org}</span>
+          </div>
+
+          {sub && <p className="emp__card-desc">{sub}</p>}
+
+          <div className="emp__meta-row">
             {(sdt || edt) && (
-              <>
-                <span className="hrd__sep">·</span>
+              <div className="emp__meta">
                 <span>
                   {sdt}
                   {edt ? ` ~ ${edt}` : ""}
                 </span>
-              </>
+              </div>
             )}
             {(time || dur) && (
-              <>
-                <span className="hrd__sep">·</span>
+              <div className="emp__meta">
                 <span>
                   {time}
                   {dur ? ` (${dur}시간)` : ""}
                 </span>
-              </>
-            )}
-          </div>
-
-          {place && (
-            <div className="hrd__meta" style={{ marginTop: 4 }}>
-              <span>장소: {place}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="hrd__side" style={{ display: "flex", gap: 8 }}>
-          {centerUrl && (
-            <a
-              className="hrd__link"
-              href={centerUrl}
-              target="_blank"
-              rel="noreferrer"
-              title="고용센터 홈페이지로 이동"
-            >
-              센터홈
-            </a>
-          )}
-          <button
-            className="hrd__link"
-            onClick={onClickBlogs}
-            aria-expanded={isOpen}
-            aria-controls={`reviews-${rowKey}`}
-          >
-            블로그후기
-          </button>
-          <Heart active={active} onClick={() => onToggleSave(it)} />
-        </div>
-
-        {isOpen && (
-          <div
-            id={`reviews-${rowKey}`}
-            className={`hrd__reviews ${isOpen ? "open" : ""}`}
-            aria-hidden={!isOpen}
-          >
-            {blogLoading && <div className="hrd__reviews-loading">후기 불러오는 중…</div>}
-            {blogError && <div className="hrd__error">{blogError}</div>}
-
-            {!blogLoading && !blogError && reviews.length === 0 && (
-              <div className="hrd__reviews-empty">관련 블로그 후기가 없습니다.</div>
-            )}
-
-            {reviews.map((b, i) => (
-              <div key={i} className="hrd__review">
-                <a
-                  href={b.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hrd__review-title"
-                  dangerouslySetInnerHTML={{ __html: b.title }}
-                />
-                <div
-                  className="hrd__review-desc"
-                  dangerouslySetInnerHTML={{ __html: b.description }}
-                />
-                <div className="hrd__review-meta">
-                  {b.bloggername} · {b.postdate.slice(0, 4)}-{b.postdate.slice(4, 6)}-
-                  {b.postdate.slice(6, 8)}
-                </div>
               </div>
-            ))}
+            )}
+            {place && (
+              <div className="emp__meta">
+                <span>장소: {place}</span>
+              </div>
+            )}
+            {topOrg && topOrg !== "-" && (
+              <div className="emp__meta">
+                <span>{topOrg}</span>
+              </div>
+            )}
           </div>
-        )}
+
+    {/* 하단 버튼 */}
+          <div className="emp__card-actions">
+            <button className="hrd__link" onClick={onClickBlogs} aria-expanded={isOpen}>
+              블로그후기
+            </button>
+
+            {centerUrl && (
+              <a
+                className="hrd__link btn--primary"
+                href={centerUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                센터홈
+              </a>
+            )}
+          </div>
+      </div>
+
+        {/* 블로그 후기 패널 */}
+        <div
+          id={`reviews-${rowKey}`}
+          className={`hrd__reviews ${isOpen ? "open" : ""}`}
+          aria-hidden={!isOpen}
+        >
+          {blogLoading && <div className="hrd__reviews-loading">후기 불러오는 중…</div>}
+          {blogError && <div className="hrd__error">{blogError}</div>}
+
+          {!blogLoading && !blogError && reviews.length === 0 && (
+            <div className="hrd__reviews-empty">관련 블로그 후기가 없습니다.</div>
+          )}
+
+          {reviews.map((b, i) => (
+            <div key={i} className="hrd__review">
+              <a
+                href={b.link}
+                target="_blank"
+                rel="noreferrer"
+                className="hrd__review-title"
+                dangerouslySetInnerHTML={{ __html: b.title }}
+              />
+              <div
+                className="hrd__review-desc"
+                dangerouslySetInnerHTML={{ __html: b.description }}
+              />
+              <div className="hrd__review-meta">
+                {b.bloggername} · {b.postdate.slice(0, 4)}-{b.postdate.slice(4, 6)}-
+                {b.postdate.slice(6, 8)}
+              </div>
+            </div>
+          ))}
+        </div>
       </li>
     );
   }
