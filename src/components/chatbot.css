@@ -1,0 +1,184 @@
+/* ===== YouthJob Chatbot (standalone) ===== */
+:root {
+  --bubble-bot-bg: #ffffff;
+  --bubble-bot-border: #e5e7eb;
+  --bubble-me-bg: #0351fa;
+  --bubble-me-text: #ffffff;
+  --avatar-size: 36px;
+}
+
+/* 모바일 프레임 패널 */
+.yj-chat-panel {
+  position: fixed;
+  right: 24px;
+  bottom: 96px;
+  width: 360px;
+  max-width: calc(100vw - 48px);
+  height: 600px;
+  max-height: calc(100vh - 160px);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(0,0,0,.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10000;
+  animation: yj-pop .15s ease-out;
+}
+
+@keyframes yj-pop {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* 상단 바 */
+.yj-chat-head {
+  height: 52px;
+  background: linear-gradient(90deg, #0351fa, #0268f6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 12px 0 16px;
+}
+.yj-chat-title {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+}
+.yj-chat-x {
+  margin-left: auto;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  color: #fff;
+  border: 0; background: transparent;
+  font-size: 22px; line-height: 22px;
+  cursor: pointer;
+}
+.yj-chat-x:hover { background: rgba(5, 65, 230, 0.12); }
+
+/* 본문 */
+.yj-chat-body {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  background:
+    radial-gradient(1200px 300px at 80% -100px, rgba(255,220,64,.12), transparent 60%),
+    #f8fafc;
+}
+
+/* ===== 메시지 행(아바타 + 말풍선) ===== */
+.yj-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 8px 0;
+}
+.yj-msg--user {          /* 사용자 메시지는 오른쪽 정렬 */
+  flex-direction: row-reverse;
+}
+
+/* 아바타 */
+.yj-avatar {
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 var(--avatar-size);
+  border: 1px solid #e5e7eb;
+  background: #fff;
+}
+.yj-avatar--me {
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+/* 말풍선 */
+.yj-bubble {
+  position: relative;
+  max-width: 78%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  line-height: 1.5;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;               /* 행 레이아웃에서 간격 관리 */
+}
+
+.yj-bubble.bot {
+  background: var(--bubble-bot-bg);
+  border: 1px solid var(--bubble-bot-border);
+  color: #000;
+}
+.yj-bubble.bot::after {
+  content: "";
+  position: absolute; top: 12px; left: -8px;
+  width: 0; height: 0;
+  border: 8px solid transparent;
+  border-right-color: var(--bubble-bot-bg); /* 왼쪽 꼬리 */
+}
+
+.yj-bubble.me {
+  background: var(--bubble-me-bg);
+  color: var(--bubble-me-text);
+  border: 0;
+}
+.yj-bubble.me::after {
+  content: "";
+  position: absolute; top: 12px; right: -8px;
+  width: 0; height: 0;
+  border: 8px solid transparent;
+  border-left-color: var(--bubble-me-bg);  /* 오른쪽 꼬리 */
+}
+
+/* 말풍선 내부 줄 */
+.yj-line { margin: 2px 0; }
+
+/* 상태/인풋 */
+.yj-typing {
+  margin: 8px 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+.yj-chat-input {
+  border-top: 1px solid #e5e7eb;
+  padding: 8px;
+  display: flex;
+  gap: 8px;
+  background: #fff;
+}
+.yj-chat-input textarea {
+  flex: 1;
+  resize: none;
+  border: 1px solid #0253f5f2;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  max-height: 160px;
+  outline: none;
+}
+.yj-chat-input textarea:focus { border-color: #111827; }
+.yj-chat-input button {
+  flex: 0 0 auto;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 0;
+  background: #020eff;
+  color: #f8f8f8;
+  font-weight: 700;
+  cursor: pointer;
+}
+.yj-chat-input button:disabled { opacity: .5; cursor: not-allowed; }
+
+/* 반응형 */
+@media (max-width: 420px) {
+  .yj-chat-panel {
+    right: 16px; left: 16px;
+    width: auto; height: 60vh;
+  }
+}

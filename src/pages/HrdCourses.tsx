@@ -8,18 +8,18 @@ import "./hrd.css";
 /* ===================== Types ===================== */
 type HrdCourse = {
   title: string;
-  subTitle?: string;
-  address?: string;
-  telNo?: string;
-  traStartDate?: string;
-  traEndDate?: string;
-  trainTarget?: string;
+  subTitle?: string;        // 기관명
+  address?: string;         // 주소(도/시)
+  telNo?: string;           // 연락처
+  traStartDate?: string;    // 시작일 (YYYY-MM-DD)
+  traEndDate?: string;      // 종료일 (YYYY-MM-DD)
+  trainTarget?: string;     // 대상
   trprId: string;
   trprDegr: string;
-  courseMan?: string | number;
-  yardMan?: string | number;
-  titleLink?: string;
-  torgId?: string;
+  courseMan?: string | number; // 교육비
+  yardMan?: string | number;   // 정원
+  titleLink?: string;          // 외부 상세 링크(신청)
+  torgId?: string;             // 우리 상세 페이지용
 };
 
 type ApiResponse<T> = { code?: string | number; message?: string; data?: T };
@@ -124,36 +124,33 @@ function getAuthHeader(): HeadersInit {
 function courseKey(c: { trprId: string; trprDegr: string }) {
   return `${c.trprId}|${c.trprDegr}`;
 }
-function Heart({ active, onClick }: { active: boolean; onClick: () => void }) {
-  return (
-    <button
-      aria-label={active ? "저장 취소" : "저장"}
-      onClick={onClick}
-      className="hrd__link"
-      title={active ? "저장 취소" : "저장"}
-      style={{
-        display: "inline-flex",
-        gap: 6,
-        alignItems: "center",
-        borderColor: active ? "#ef4444" : undefined,
-        color: active ? "#ef4444" : undefined,
-      }}
-    >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill={active ? "#ef4444" : "none"}
-        stroke={active ? "#ef4444" : "#64748b"}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-      </svg>
-      {active ? "저장됨" : "저장"}
-    </button>
-  );
+function monthDiff(a?: string, b?: string) {
+  if (!a || !b) return null;
+  const s = new Date(a);
+  const e = new Date(b);
+  if (isNaN(s.getTime()) || isNaN(e.getTime())) return null;
+  const months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+  return months <= 0 ? 1 : months;
+}
+function dateLabel(a?: string, b?: string) {
+  if (!a && !b) return "";
+  if (a && b) return `${a} ~ ${b}`;
+  return a ? `${a} ~` : `~ ${b}`;
+}
+
+/** 썸네일 경로 빌더.
+ *  - public/img/cards/ 아래에 이미지를 넣고 파일명을 반환.
+ *  - 지금은 전부 기본 이미지(card1.jpg)를 사용.
+ *  - 필요하면 기관명/과정ID별 매핑을 아래에 추가하면 됨.
+ */
+const DEFAULT_THUMB = "/img/cards/card1.jpg";
+const THUMB_BY_ORG: Record<string, string> = {
+  // 예: "러닝플러스 주식회사": "/img/cards/learningplus.jpg",
+};
+
+function getThumbSrc(c: HrdCourse) {
+  if (c.subTitle && THUMB_BY_ORG[c.subTitle]) return THUMB_BY_ORG[c.subTitle];
+  return DEFAULT_THUMB;
 }
 
 /* ===================== Component ===================== */
@@ -169,9 +166,7 @@ export default function HrdCourses() {
     ).padStart(2, "0")}`
   );
   const [endDate, setEndDate] = useState(
-    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
-      now.getDate()
-    ).padStart(2, "0")}`
+    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
   );
 
   const [area1, setArea1] = useState<string>("");
@@ -192,16 +187,12 @@ export default function HrdCourses() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/v1/hrd/saved`, {
-          headers: { ...getAuthHeader() },
-        });
-        if (res.status === 401) return; // 비로그인은 조용히 패스
+        const res = await fetch(`${API_BASE}/api/v1/hrd/saved`, { headers: { ...getAuthHeader() } });
+        if (res.status === 401) return; // 비로그인 패스
         const json: ApiResponse<SavedCourseDto[]> | SavedCourseDto[] = await res.json();
         const data = Array.isArray(json) ? json : json?.data ?? [];
         const m: Record<string, number> = {};
-        for (const s of data) {
-          if (s?.trprId && s?.trprDegr && s?.id) m[courseKey(s)] = s.id;
-        }
+        for (const s of data) if (s?.trprId && s?.trprDegr && s?.id) m[`${s.trprId}|${s.trprDegr}`] = s.id;
         setSavedMap(m);
       } catch {
         // ignore
@@ -264,7 +255,6 @@ export default function HrdCourses() {
       const savedId = savedMap[key];
 
       if (savedId) {
-        // 삭제
         const res = await fetch(`${API_BASE}/api/v1/hrd/saved/${savedId}`, {
           method: "DELETE",
           headers: { ...getAuthHeader() },
@@ -281,7 +271,6 @@ export default function HrdCourses() {
           return n;
         });
       } else {
-        // 추가 (SaveCourseRequest 스펙)
         const body = {
           trprId: course.trprId,
           trprDegr: course.trprDegr,
@@ -315,13 +304,23 @@ export default function HrdCourses() {
 
         const json: ApiResponse<SavedCourseDto> | SavedCourseDto = await res.json();
         const saved = (json as any)?.data ?? json;
-        if (saved?.id) {
-          setSavedMap((m) => ({ ...m, [key]: saved.id }));
-        }
+        if (saved?.id) setSavedMap((m) => ({ ...m, [key]: saved.id }));
       }
     } catch (e: any) {
       alert(e?.message ?? "처리에 실패했습니다.");
     }
+  }
+
+  // 이미지 로드 핸들러 (실패 시 플레이스홀더 보이기)
+  function onImgError(e: React.SyntheticEvent<HTMLImageElement>) {
+    const img = e.currentTarget;
+    img.style.display = "none";
+    const parent = img.parentElement;
+    if (parent) parent.classList.add("is-empty");
+  }
+  function onImgLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    const parent = (e.currentTarget.parentElement);
+    if (parent) parent.classList.remove("is-empty");
   }
 
   return (
@@ -412,60 +411,130 @@ export default function HrdCourses() {
             {error && <div className="hrd__error">{error}</div>}
             {!loading && !error && items.length === 0 && <div className="hrd__empty">검색 결과가 없습니다.</div>}
 
-            <ul className="hrd__list">
+            <ul className="hrd__cards">
               {items.map((c) => {
                 const key = courseKey(c);
                 const active = !!savedMap[key];
+                const months = monthDiff(c.traStartDate, c.traEndDate);
+
                 return (
-                  <li key={`${c.trprId}-${c.trprDegr}`} className="hrd__item">
-                    <div className="hrd__main">
-                      <h3 className="hrd__course">{c.title}</h3>
+                  <li key={`${c.trprId}-${c.trprDegr}`} className="hrd__card">
+                    {/* 우상단 즐겨찾기(심플 아이콘) */}
+                    <button
+                      aria-label={active ? "저장 취소" : "저장"}
+                      onClick={() => toggleSave(c)}
+                      className={`hrd__fav ${active ? "is-active" : ""}`}
+                      title={active ? "저장 취소" : "저장"}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0-0-7.78z" />
+                      </svg>
+                    </button>
 
-                      <div className="hrd__meta">
-                        <span className="hrd__org">{c.subTitle}</span>
-                        {c.address && (
-                          <>
-                            <span className="hrd__sep">·</span>
-                            <span>{c.address}</span>
-                          </>
-                        )}
-                        {(c.traStartDate || c.traEndDate) && (
-                          <>
-                            <span className="hrd__sep">·</span>
-                            <span>
-                              {c.traStartDate} ~ {c.traEndDate}
-                            </span>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="hrd__submeta">
-                        {c.telNo && <span>연락처: {c.telNo}</span>}
-                        {c.trainTarget && <span>대상: {c.trainTarget}</span>}
-                        {c.courseMan !== undefined && <span>교육비: {toMoney(c.courseMan)}</span>}
-                        {c.yardMan !== undefined && <span>정원: {c.yardMan}</span>}
-                      </div>
+                    {/* 좌측 썸네일 */}
+                    <div className="hrd__thumb is-empty" aria-hidden="true">
+                      <img
+                        className="hrd__thumb-img"
+                        alt=""
+                        src={getThumbSrc(c)}
+                        onError={onImgError}
+                        onLoad={onImgLoad}
+                        loading="lazy"
+                      />
+                      <span className="hrd__thumb-dot" />
                     </div>
 
-                    <div className="hrd__side" style={{ display: "flex", gap: 8 }}>
-                      {c.torgId ? (
-                        <Link
-                          className="hrd__link"
-                          to={`/hrd/courses/${c.trprId}/${c.trprDegr}?torgId=${encodeURIComponent(c.torgId)}`}
-                        >
-                          상세보기
-                        </Link>
-                      ) : c.titleLink ? (
-                        <a className="hrd__link" href={c.titleLink} target="_blank" rel="noreferrer">
-                          상세보기
-                        </a>
-                      ) : (
-                        <button className="hrd__link" disabled>
-                          상세보기
-                        </button>
+                    {/* 본문 */}
+                    <div className="hrd__card-main">
+                      <div className="hrd__card-head">
+                        <h3 className="hrd__card-title">{c.title}</h3>
+                        {c.subTitle && <div className="hrd__card-sub">{c.subTitle}</div>}
+                      </div>
+
+                      <p className="hrd__card-desc">
+                        {c.trainTarget ? `대상: ${c.trainTarget}` : c.address ? c.address : "국민내일배움카드 지원 과정"}
+                      </p>
+
+                      {/* 아이콘 칩들 */}
+                      <div className="hrd__tags">
+                        {c.address && (
+                          <span className="hrd__tag">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0Z" />
+                              <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            {c.address}
+                          </span>
+                        )}
+                        {months && (
+                          <span className="hrd__tag">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <circle cx="12" cy="12" r="9" />
+                              <path d="M12 7v5l3 3" />
+                            </svg>
+                            {months}개월
+                          </span>
+                        )}
+                        <span className="hrd__tag hrd__tag--success">
+                          {/* 달러 아이콘 */}
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M12 1v22" />
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                          </svg>
+                          국민내일배움카드
+                        </span>
+                        {c.yardMan !== undefined && (
+                          <span className="hrd__tag">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                              <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                              <circle cx="9" cy="7" r="4" />
+                              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                            정원 {c.yardMan}
+                          </span>
+                        )}
+                      </div>
+
+                      {(c.traStartDate || c.traEndDate || c.telNo || c.courseMan !== undefined) && (
+                        <div className="hrd__meta-row">
+                          {(c.traStartDate || c.traEndDate) && (
+                            <span className="hrd__meta">{dateLabel(c.traStartDate, c.traEndDate)}</span>
+                          )}
+                          {c.telNo && <span className="hrd__meta">문의: {c.telNo}</span>}
+                          {c.courseMan !== undefined && <span className="hrd__meta">교육비: {toMoney(c.courseMan)}</span>}
+                        </div>
                       )}
 
-                      <Heart active={active} onClick={() => toggleSave(c)} />
+                      {/* 우하단 액션 */}
+                      <div className="hrd__card-actions">
+                        {c.torgId ? (
+                          <Link
+                            className="hrd__btn-outline"
+                            to={`/hrd/courses/${c.trprId}/${c.trprDegr}?torgId=${encodeURIComponent(c.torgId)}`}
+                          >
+                            상세보기
+                          </Link>
+                        ) : c.titleLink ? (
+                          <a className="hrd__btn-outline" href={c.titleLink} target="_blank" rel="noreferrer">
+                            상세보기
+                          </a>
+                        ) : (
+                          <button className="hrd__btn-outline" disabled>
+                            상세보기
+                          </button>
+                        )}
+
+                        {c.titleLink ? (
+                          <a className="hrd__btn-primary" href={c.titleLink} target="_blank" rel="noreferrer">
+                            신청하기
+                          </a>
+                        ) : (
+                          <button className="hrd__btn-primary" disabled>
+                            신청하기
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </li>
                 );
