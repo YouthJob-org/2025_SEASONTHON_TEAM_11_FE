@@ -1,14 +1,19 @@
 // src/App.tsx
+import { useEffect } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Footer from "./components/Footer";
 import Steps from "./components/Steps";
 import Stats from "./components/Stats";
 import CardTabs from "./components/CardTabs";
-import ChatFloat from "./components/ChatFloat"; 
+import ChatFloat from "./components/ChatFloat";
+import { prefetchPoliciesAllSilent } from "./utils/policiesPrefetch";
 import "./global.css";
 
 export default function App() {
+  useEffect(() => {
+    prefetchPoliciesAllSilent(); // await X
+  }, []);
   return (
     <div className="app-layout">{/* ✅ 세로 플렉스 래퍼 */}
       <Navbar />
