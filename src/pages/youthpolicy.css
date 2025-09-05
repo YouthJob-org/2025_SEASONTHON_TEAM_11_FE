@@ -34,20 +34,15 @@
   color:#334155;
   line-height:1.45;
   overflow:hidden;
-
-  /* 구 브라우저(WebKit)용 */
   display:-webkit-box;
   -webkit-box-orient:vertical;
-  -webkit-line-clamp:3;
-
-  /* 표준 */
-  line-clamp:3;
+  -webkit-line-clamp:3; /* 기본 3줄 */
 }
 @media (max-width: 980px) {
-  .yp__summary { -webkit-line-clamp:4; line-clamp:4; }
+  .yp__summary { -webkit-line-clamp:4; }
 }
 @media (max-width: 640px) {
-  .yp__summary { -webkit-line-clamp:6; line-clamp:6; }
+  .yp__summary { -webkit-line-clamp:6; }
 }
 
 .yp__meta { display:flex; flex-wrap:wrap; gap:8px; color:#475569; }
