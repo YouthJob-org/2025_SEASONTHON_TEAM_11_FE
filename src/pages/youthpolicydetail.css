@@ -49,8 +49,8 @@ html { color-scheme: light; } /* 브라우저 기본 UI도 라이트로 */
 
 /* ───────── Section Cards ───────── */
 .yp__sectionCard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow-sm)}
-.yp__section_t{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;color:var(--text);margin-bottom:12px}
-.yp__section_t::before{content:"";width:18px;height:18px;background:var(--brand);mask-size:contain;mask-position:center;mask-repeat:no-repeat}
+.yp__section_t{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;color:var(--text);margin-bottom:12px}
+.yp__section_t::before{content:"";width:24px;height:24px;background:var(--brand);mask-size:contain;mask-position:center;mask-repeat:no-repeat}
 .yp__section_t--info::before{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 17h2v-6h-2v6Zm1-8q.425 0 .713-.288T13 8q0-.425-.288-.712T12 7q-.425 0-.712.288T11 8q0 .425.288.713T12 9Z"/></svg>')}
 .yp__section_t--form::before{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 4h16v2H4Zm0 7h16v2H4Zm0 7h10v2H4Z"/></svg>')}
 .yp__section_t--gift::before{mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 7h-3.1A3 3 0 1 0 12 5a3 3 0 1 0-4.9 2H4v4h16V7Z"/></svg>')}
