@@ -1,38 +1,141 @@
+/* 공통 컨테이너 */
 .hrd { background:#f8fafc; min-height:100vh; }
-.hrd__container { max-width:1120px; margin:0 auto; padding:32px 20px 60px; }
+.hrd__container { max-width:1120px; margin:0 auto; padding:28px 20px 48px; }
 
 .hrd__title { font-size:32px; font-weight:800; color:#0f172a; margin-bottom:6px; }
-.hrd__subtitle { color:#475569; margin-bottom:20px; }
+.hrd__subtitle { color:#475569; margin-bottom:18px; }
 
-.hrd__search { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:16px; box-shadow:0 4px 16px rgba(2,6,23,.04); }
-.hrd__row { display:flex; gap:12px; flex-wrap:wrap; }
-.hrd__field { display:flex; flex-direction:column; gap:6px; min-width:180px; }
+/* 검색바 */
+.hrd__search { background:#fff; border:1px solid #e2e8f0; border-radius:16px; padding:14px; box-shadow:0 4px 16px rgba(2,6,23,.04); }
+.hrd__row { display:flex; gap:10px; flex-wrap:wrap; }
+.hrd__field { display:flex; flex-direction:column; gap:6px; min-width:172px; }
 .hrd__field label { font-size:12px; color:#64748b; }
 .hrd__field input[type="date"],
-.hrd__field select { height:40px; padding:0 10px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; }
+.hrd__field select { height:38px; padding:0 10px; border:1px solid #cbd5e1; border-radius:10px; background:#fff; color:#0f172a; }
 
 .hrd__actions { display:flex; align-items:flex-end; margin-left:auto; }
-.hrd__btn { height:40px; padding:0 16px; border-radius:999px; background:#024ef2; color:#fff; font-weight:700; border:none; box-shadow:0 6px 16px rgba(2,78,242,.18); cursor:pointer; }
+.hrd__btn { height:38px; padding:0 16px; border-radius:999px; background:#024ef2; color:#fff; font-weight:700; border:none; box-shadow:0 6px 16px rgba(2,78,242,.18); cursor:pointer; }
 .hrd__btn:hover { filter:brightness(0.96); }
 
-.hrd__result { margin-top:18px; }
-.hrd__loading, .hrd__error, .hrd__empty { padding:18px; color:#334155; }
+/* 결과 영역 */
+.hrd__result { margin-top:16px; }
+.hrd__loading, .hrd__error, .hrd__empty { padding:16px; color:#334155; }
 .hrd__error { color:#dc2626; }
 
-.hrd__list { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
-.hrd__item { display:flex; align-items:stretch; gap:12px; background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:14px; }
-.hrd__badge { align-self:flex-start; background:#e0f2fe; color:#0369a1; font-weight:700; font-size:12px; padding:6px 10px; border-radius:999px; }
-.hrd__main { flex:1; }
-.hrd__course { font-size:18px; font-weight:800; color:#0f172a; margin:2px 0 6px; }
-.hrd__meta { color:#475569; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-.hrd__sep { color:#cbd5e1; }
-.hrd__submeta { margin-top:8px; display:flex; flex-wrap:wrap; gap:10px; color:#334155; }
+/* 카드 리스트 */
+.hrd__cards { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
 
-.hrd__side { display:flex; align-items:center; }
-.hrd__link { padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; text-decoration:none; cursor:pointer; }
-.hrd__link:hover { background:#f1f5f9; }
+/* 카드: 2열 (썸네일 | 본문) + 우상단 즐겨찾기 */
+.hrd__card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 12px;
+  align-items: start;
+  background:#fff;
+  border:1px solid #e2e8f0;
+  border-radius:16px;
+  padding:12px 14px 10px;
+  box-shadow:0 6px 18px rgba(2,6,23,.04);
+}
 
-.hrd__pagenav { margin-top:16px; display:flex; align-items:center; gap:10px; justify-content:center; }
-.hrd__pagenav button { height:36px; padding:0 14px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; }
+/* 우상단 즐겨찾기(심플) */
+.hrd__fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.hrd__fav:hover { background:#f8fafc; }
+.hrd__fav.is-active { color:#ef4444; border-color:#fecaca; background:#fff; }
+
+/* 썸네일 */
+.hrd__thumb {
+  width:60px; height:60px; border-radius:14px;
+  background:#f1f5f9; position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+}
+.hrd__thumb-img {
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.hrd__thumb-dot {
+  width:10px; height:10px; border-radius:50%; background:#94a3b8;
+}
+/* 이미지가 실패했을 때만 점 보이기 */
+.hrd__thumb:not(.is-empty) .hrd__thumb-dot { display:none; }
+
+/* 본문 타이포 */
+.hrd__card-main { display:flex; flex-direction:column; gap:8px; }
+.hrd__card-head { display:flex; flex-direction:column; gap:2px; }
+.hrd__card-title { font-size:22px; font-weight:800; color:#0f172a; margin:0; }
+.hrd__card-sub { color:#64748b; font-weight:600; font-size:13px; }
+.hrd__card-desc { margin:0; color:#334155; }
+
+/* 아이콘 칩 */
+.hrd__tags { display:flex; gap:6px; flex-wrap:wrap; }
+.hrd__tag {
+  display:inline-flex; align-items:center; gap:6px;
+  height:26px; padding:0 10px; border-radius:999px;
+  background:#fff;
+  color:#0f172a;
+  border:1px solid #e2e8f0;
+  font-size:12px; font-weight:700;
+}
+.hrd__tag svg { display:block; }
+
+/* 국민내일배움카드 칩: 볼드 제거 + 연초록 톤 유지 */
+.hrd__tag--success {
+  color:#16a34a;
+  border-color:#bbf7d0;
+  background:#f0fdf4;
+  font-weight:500;
+}
+
+/* 메타 */
+.hrd__meta-row { display:flex; gap:12px; flex-wrap:wrap; color:#475569; font-size:14px; }
+
+/* 우하단 액션 버튼들 */
+.hrd__card-actions {
+  margin-top: 6px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-self: flex-end;
+}
+
+/* 버튼 */
+.hrd__btn-outline {
+  height:34px; padding:0 12px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; color:#0f172a;
+  text-decoration:none; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+}
+.hrd__btn-outline:hover { background:#f1f5f9; }
+.hrd__btn-outline:disabled { opacity:.5; cursor:not-allowed; }
+
+.hrd__btn-primary {
+  height:34px; padding:0 12px; border-radius:10px; border:1px solid #1d4ed8; background:#1d4ed8; color:#fff;
+  text-decoration:none; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+  box-shadow:0 5px 14px rgba(29,78,216,.18);
+}
+.hrd__btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+
+/* 페이지네이션 */
+.hrd__pagenav { margin-top:14px; display:flex; align-items:center; gap:10px; justify-content:center; }
+.hrd__pagenav button { height:34px; padding:0 14px; border-radius:999px; border:1px solid #cbd5e1; background:#fff; cursor:pointer; }
 .hrd__pagenav button:disabled { opacity:.5; cursor:not-allowed; }
 .hrd__page { font-weight:700; color:#0f172a; }
+
+/* 반응형 */
+@media (max-width: 720px) {
+  .hrd__card { grid-template-columns: 52px 1fr; padding:10px 12px 10px; }
+  .hrd__thumb { width:52px; height:52px; border-radius:12px; }
+  .hrd__card-actions { justify-content: flex-end; align-self: stretch; }
+}
