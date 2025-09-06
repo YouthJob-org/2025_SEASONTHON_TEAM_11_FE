@@ -22,7 +22,7 @@
 /* 레이아웃 */
 .yj-nav__inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1120px;margin:0 auto;padding:0 20px}
 .yj-nav__brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;font-weight:900}
-.yj-logo{height:60px;width:auto;display:block}
+.yj-logo{height:80px;width:auto;display:block}
 
 .yj-nav__menu{display:flex;gap:40px}
 .yj-nav__menu a{
@@ -71,29 +71,37 @@
   .yj-nav__hamburger{display:inline-block}
 }
 /* --- MyPage 칩 버튼 --- */
-.yj-nav__mypage{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:8px 14px;
-  border-radius:999px;
-  background:#ffffff;
-  color:#0f172a;
-  font-weight:700;
-  text-decoration:none;
-  border:1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(2,6,23,.06);
+.yj-nav__mypage {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;              /* 로그아웃 버튼과 동일 */
+  border-radius: 999px;
+  background: #ffffff;            /* 로그아웃 버튼과 동일 */
+  color: #0f172a;
+  font-weight: 600;               /* 로그아웃 버튼과 동일 */
+  text-decoration: none;
+  border: 1px solid #e2e8f0;      /* 로그아웃 버튼과 동일 */
+  cursor: pointer;                /* 버튼 느낌 */
   transition: color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease, box-shadow .15s ease;
 }
-.yj-nav__mypage:hover{
-  background: rgba(2,78,242,.06);
-  color:#024ef2;
-  border-color:#cfe0ff;
+.yj-nav__mypage:hover {
+  background: #e2e8f0;            /* 로그아웃 버튼 hover와 동일 */
+  color: #024ef2;
+  border-color: #cfe0ff;
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(2,6,23,.10);
 }
-.yj-nav__mypage:active{
+.yj-nav__mypage:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(2,6,23,.06);
 }
-.yj-nav__mypage svg{
-  width:18px; height:18px; flex:0 0 18px;
+.yj-nav__mypage svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.yj-nav__username {
+  color: #2563eb; /* Tailwind 기준 파란색 (blue-600) */
+  font-weight: bold;
 }
