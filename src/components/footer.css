@@ -82,13 +82,14 @@
 .yj-footer__links-group h4 {
   font-weight: 700;
   margin-bottom: 12px;
+  margin-left: 80px;
   font-size: 15px;
 }
 
 .yj-footer__links-group ul {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin-left: 70px;
 }
 
 .yj-footer__links-group li { margin-bottom: 3px; }
