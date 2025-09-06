@@ -57,7 +57,8 @@
 }
 .hrd__fav:hover { background:#f8fafc; }
 .hrd__fav.is-active { color:#ef4444; border-color:#fecaca; background:#fff; }
-
+.hrd__fav.is-active svg path { fill: currentColor; }
+.hrd__fav svg { transition: fill .15s ease, color .15s ease; }
 /* 썸네일 */
 .hrd__thumb {
   width:60px; height:60px; border-radius:14px;

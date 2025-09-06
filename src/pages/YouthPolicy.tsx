@@ -80,7 +80,42 @@ function includesIgnoreCase(hay: string | undefined, needle: string) {
   return hay.toLowerCase().includes(needle.toLowerCase());
 }
 
-/* ================== 컴포넌트 ================== */
+/* ================== 소컴포넌트 ================== */
+function HeartButton({
+  on,
+  onClick,
+  labelOn = "관심 해제",
+  labelOff = "관심 저장",
+}: {
+  on: boolean;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  labelOn?: string;
+  labelOff?: string;
+}) {
+  return (
+    <button
+      className={`yp__heart ${on ? "is-on" : ""}`}
+      type="button"
+      aria-label={on ? labelOn : labelOff}
+      aria-pressed={on}
+      onClick={onClick}
+    >
+      <svg
+  viewBox="0 0 24 24"
+  aria-hidden="true"
+  fill="none"
+  stroke="currentColor"
+  strokeWidth="2"
+  strokeLinecap="round"
+  strokeLinejoin="round"
+>
+  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/>
+</svg>
+    </button>
+  );
+}
+
+/* ================== 페이지 컴포넌트 ================== */
 export default function YouthPolicyPage() {
   const navigate = useNavigate();
 
@@ -120,6 +155,7 @@ export default function YouthPolicyPage() {
   }, []);
 
   async function toggleSaved(plcyNo: string) {
+    // 낙관적 업데이트
     setSavedSet((prev) => {
       const next = new Set(prev);
       const key = String(plcyNo);
@@ -128,13 +164,14 @@ export default function YouthPolicyPage() {
       return next;
     });
     try {
-      await fetch("https://youthjob.site/api/v1/youth-policies/saved/toggle", {
+      const res = await fetch("https://youthjob.site/api/v1/youth-policies/saved/toggle", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeader() },
         body: JSON.stringify({ plcyNo }),
       });
+      if (!res.ok) throw new Error("toggle failed");
     } catch {
-      // 롤백
+      // 실패 시 롤백
       setSavedSet((prev) => {
         const next = new Set(prev);
         const key = String(plcyNo);
@@ -157,7 +194,6 @@ export default function YouthPolicyPage() {
         if (cached?.length) {
           if (!stopped) setAllRaw(cached);
         }
-        // 캐시가 없거나 오래됐을 때 백그라운드 수집(세션에 계속 쌓임)
         await prefetchPoliciesAllSilent();
         if (!stopped) {
           const again = getCachedPolicies();
@@ -178,18 +214,21 @@ export default function YouthPolicyPage() {
   const applyFilterFlagRef = useRef(0);
   const bumpFilter = () => (applyFilterFlagRef.current += 1);
 
-  const filtered = useMemo(() => {
-    // applyFilterFlagRef.current 은 사용만 해서 memo 깨우는 용도
-    void applyFilterFlagRef.current;
-
-    const name = plcyNm.trim();
+  const kwList = useMemo(() => {
     const kwRaw = plcyKywdNm.trim();
-    const kwList = kwRaw
+    return kwRaw
       ? kwRaw
           .split(/[,\s]+/)
           .map((s) => s.trim())
           .filter(Boolean)
       : [];
+  }, [plcyKywdNm]);
+
+  const filtered = useMemo(() => {
+    // applyFilterFlagRef.current 은 memo 깨우는 용도
+    void applyFilterFlagRef.current;
+
+    const name = plcyNm.trim();
 
     return allRaw.filter((p) => {
       // 지역(5자리 prefix)
@@ -211,7 +250,7 @@ export default function YouthPolicyPage() {
       return true;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allRaw, zipCd, plcyNm, plcyKywdNm, lclsfNm, mclsfNm, applyFilterFlagRef.current]);
+  }, [allRaw, zipCd, plcyNm, lclsfNm, mclsfNm, kwList, applyFilterFlagRef.current]);
 
   /* -------- 화면용 30개 슬라이스 -------- */
   const pageSlice = useMemo(() => {
@@ -226,6 +265,14 @@ export default function YouthPolicyPage() {
   const onSearch = () => {
     setPage(1);
     bumpFilter();
+  };
+
+  /* -------- 키보드 접근성: 카드 항목 -------- */
+  const handleItemKeyDown = (e: React.KeyboardEvent, plcyNo: string) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      navigate(`/youth-policies/${encodeURIComponent(plcyNo)}`);
+    }
   };
 
   return (
@@ -264,7 +311,7 @@ export default function YouthPolicyPage() {
                 <label>키워드(쉼표/띄어쓰기)</label>
                 <input
                   type="text"
-                  placeholder='예) 보조금, 교통비'
+                  placeholder="예) 보조금, 교통비"
                   value={plcyKywdNm}
                   onChange={(e) => setPlcyKywdNm(e.target.value)}
                 />
@@ -317,30 +364,30 @@ export default function YouthPolicyPage() {
             <ul className="yp__grid">
               {pageSlice.map((p) => {
                 const isSaved = savedSet.has(String(p.plcyNo));
+                const goDetail = () =>
+                  navigate(`/youth-policies/${encodeURIComponent(p.plcyNo)}`);
+
                 return (
                   <li
                     key={p.plcyNo}
                     className="yp__card yp__card--clickable"
-                    onClick={() => navigate(`/youth-policies/${encodeURIComponent(p.plcyNo)}`)}
+                    onClick={goDetail}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter")
-                        navigate(`/youth-policies/${encodeURIComponent(p.plcyNo)}`);
-                    }}
+                    onKeyDown={(e) => handleItemKeyDown(e, p.plcyNo)}
+                    aria-label={`${p.plcyNm} 상세 보기`}
                   >
-                    <div className="yp__card_head">
+                    <div className="yp__card_head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span className="yp__badge">{p.lclsfNm || "정책"}</span>
-                      <button
-                        className={`yp__heart ${isSaved ? "is-on" : ""}`}
-                        aria-label="관심저장"
+
+                      {/* 하트: 클릭 전파 막기 */}
+                      <HeartButton
+                        on={isSaved}
                         onClick={(e) => {
                           e.stopPropagation();
                           toggleSaved(p.plcyNo);
                         }}
-                      >
-                        <span className="yp__heart_shape" />
-                      </button>
+                      />
                     </div>
 
                     <h3 className="yp__title_sm">{p.plcyNm}</h3>
@@ -359,9 +406,16 @@ export default function YouthPolicyPage() {
                       )}
                     </div>
 
+                    {/* 바깥으로 네비게이션 전파 방지 */}
                     <div className="yp__card_foot" onClick={(e) => e.stopPropagation()}>
                       {p.refUrlAddr1 && (
-                        <a className="yp__link" href={p.refUrlAddr1} target="_blank" rel="noreferrer">
+                        <a
+                          className="yp__link"
+                          href={p.refUrlAddr1}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           사이트 이동
                         </a>
                       )}
