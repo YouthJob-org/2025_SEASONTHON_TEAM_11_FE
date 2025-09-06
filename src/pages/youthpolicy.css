@@ -51,10 +51,60 @@
 .yp__link { padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; background:#fff; color:#0f172a; text-decoration:none; cursor:pointer; }
 .yp__link:hover { background:#f1f5f9; }
 
-/* 하트 버튼 */
-.yp__heart { width:36px; height:36px; border-radius:50%; border:1px solid #e2e8f0; background:#fff; display:grid; place-items:center; cursor:pointer; box-shadow:0 2px 8px rgba(2,6,23,.05); }
-.yp__heart_shape { width:18px; height:18px; mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21s-6.716-4.43-9.2-7.2C.72 11.54.4 8.5 2.5 6.6 4.1 5.2 6.7 5.4 8 6.8c.9 1 2 2.2 4 4 2-1.8 3.1-3 4-4 1.3-1.4 3.9-1.6 5.5 0 2.1 1.9 1.8 4.94-.3 7.2C18.716 16.57 12 21 12 21z"/></svg>') center / contain no-repeat; background:#cbd5e1; }
-.yp__heart.is-on .yp__heart_shape { background:#ef4444; }
+/* ── 하트: 기본/호버/활성 상태를 HRD 톤과 통일 ── */
+
+/* 기본 */
+/* 버튼 자체 */
+.yp__heart {
+  width: 32px; height: 32px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #94a3b8;               /* 기본 회색 (currentColor로 아이콘 채움) */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(2,6,23,.05);
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease, color .15s ease, transform .15s ease;
+}
+.yp__heart:hover { background:#f8fafc; border-color:#dbe3f0; box-shadow:0 4px 12px rgba(2,6,23,.08); }
+.yp__heart:active { transform: scale(.96); }
+.yp__heart:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(2,78,242,.25);
+}
+
+/* 아이콘 (SVG) */
+.yp__heart svg { width: 18px; height: 18px; display:block; }
+.yp__heart svg path {
+  fill: none;                /* 기본은 속이 비어있는 하트 */
+  stroke: currentColor;      /* 테두리만 표시 */
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: fill .15s ease, stroke .15s ease;
+}
+.yp__heart.is-on svg path {
+  fill: currentColor;        /* 채워진 하트 */
+  stroke: currentColor;      /* 테두리와 색 통일 */
+}
+/* 활성(저장됨) */
+.yp__heart.is-on {
+  color:#ef4444;         /* 빨강 채움 */
+  border-color:#fecaca;  /* 연빨강 테두리 */
+  background:#fff;
+  box-shadow:0 4px 12px rgba(239,68,68,.15);
+}
+.yp__heart.is-on:hover { color:#dc2626; }
+
+/* HRD처럼 카드 우상단에 고정하고 싶다면 (선택)
+   .yp__card를 position:relative로 둔 상태에서 사용 */
+.yp__heart--topright {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
 
 /* 페이지네이션 */
 .yp__pagenav { margin-top:16px; display:flex; align-items:center; gap:10px; justify-content:center; }
