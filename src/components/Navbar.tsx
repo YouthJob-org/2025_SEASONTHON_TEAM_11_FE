@@ -76,16 +76,18 @@ export default function Navbar() {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  const handleLogout = () => {
+ const handleLogout = () => {
     clearAuth();
     setUserEmail(null);
     navigate("/");
   };
 
+// 이메일 앞부분 추출
+  const userName = userEmail ? userEmail.split("@")[0] : null;
+
   return (
     <header className={`yj-nav ${scrolled ? "is-solid" : ""}`}>
       <div className="yj-nav__inner">
-        {/* SPA 네비게이션이면 Link가 더 좋아요 */}
         <Link className="yj-nav__brand" to="/">
           <img src="/Logo.png" alt="YouthJob" className="yj-logo" />
         </Link>
@@ -97,27 +99,27 @@ export default function Navbar() {
         </nav>
 
         <div className="yj-nav__right">
-          {userEmail ? (
-              <>
-                <span className="yj-nav__welcome">
-                  안녕하세요 <span className="yj-nav__email">{userEmail}</span> 님!
-                </span>
- <Link className="yj-nav__mypage" to="/mypage" aria-label="마이페이지">
-        <svg
-          width="18" height="18" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-        마이페이지
-      </Link>
-                <button className="yj-nav__logout" onClick={handleLogout}>
-                  로그아웃
-                </button>
-              </>
-            ) : (
+          {userName ? (
+            <>
+              <span className="yj-nav__welcome">
+                <span className="yj-nav__username">{userName}</span>님 안녕하세요!
+              </span>
+              <Link className="yj-nav__mypage" to="/mypage" aria-label="마이페이지">
+                <svg
+                  width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                마이페이지
+              </Link>
+              <button className="yj-nav__logout" onClick={handleLogout}>
+                로그아웃
+              </button>
+            </>
+          ) : (
             <>
               <Link className="yj-nav__link" to="/login">
                 로그인
