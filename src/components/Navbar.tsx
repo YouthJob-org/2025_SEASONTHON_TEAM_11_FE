@@ -89,7 +89,7 @@ export default function Navbar() {
     <header className={`yj-nav ${scrolled ? "is-solid" : ""}`}>
       <div className="yj-nav__inner">
         <Link className="yj-nav__brand" to="/">
-          <img src="/Logo.png" alt="YouthJob" className="yj-logo" />
+          <img src="/Logo1.png" alt="YouthJob" className="yj-logo" />
         </Link>
 
         <nav className={`yj-nav__menu ${open ? "is-open" : ""}`}>
