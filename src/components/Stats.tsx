@@ -23,7 +23,7 @@ export default function Stats() {
 
         <div className="yj-stats__cards">
           <div className="yj-stat">
-            <div className="yj-stat__number">88126 +</div>
+            <div className="yj-stat__number">6,697 +</div>
             <div className="yj-stat__label">등록된<br />훈련과정</div>
           </div>
           <div className="yj-stat">
@@ -31,7 +31,7 @@ export default function Stats() {
             <div className="yj-stat__label">등록된<br />구직자 취업역량 강화프로그램</div>
           </div>
           <div className="yj-stat">
-            <div className="yj-stat__number">4096 +</div>
+            <div className="yj-stat__number">4,096 +</div>
             <div className="yj-stat__label">청년 정책<br />데이터</div>
           </div>
         </div>
