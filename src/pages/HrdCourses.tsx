@@ -202,38 +202,42 @@ export default function HrdCourses() {
 
   // 검색
   const fetchCourses = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const params = new URLSearchParams({
-        startDt: ymdInputToParam(startDate),
-        endDt: ymdInputToParam(endDate),
-        page: String(page),
-        size: String(size),
-        sort,
-        sortCol,
-      });
-      if (area1) params.append("area1", area1);
-      if (ncs1) params.append("ncs1", ncs1);
+  setLoading(true);
+  setError("");
+  try {
+    const params = new URLSearchParams({
+      startDt: ymdInputToParam(startDate),
+      endDt: ymdInputToParam(endDate),
+      page: String(page),
+      size: String(size),
+      sort,
+      sortCol,
+    });
+    if (area1) params.append("area1", area1);
+    if (ncs1) params.append("ncs1", ncs1);
 
-      const res = await fetch(`${API_BASE}/api/v1/hrd/courses?${params.toString()}`, {
-        headers: { ...getAuthHeader() },
-      });
-      if (res.status === 401) {
-        alert("로그인이 필요합니다.");
-        navigate("/login");
-        return;
-      }
-      if (!res.ok) throw new Error("데이터를 불러오지 못했습니다.");
-      const data: HrdCourse[] = await res.json();
-      setItems(Array.isArray(data) ? data : []);
-    } catch (e: any) {
-      setError(e?.message ?? "오류가 발생했습니다.");
-      setItems([]);
-    } finally {
-      setLoading(false);
+    const res = await fetch(`${API_BASE}/api/v1/hrd/courses?${params.toString()}`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (res.status === 401) {
+      alert("로그인이 필요합니다.");
+      navigate("/login");
+      return;
     }
-  };
+    if (!res.ok) throw new Error("데이터를 불러오지 못했습니다.");
+
+    const json = await res.json();
+    // 페이지/일반 응답 모두 처리
+    const list: HrdCourse[] = Array.isArray(json) ? json : (json?.content ?? json?.data ?? []);
+    setItems(Array.isArray(list) ? list : []);
+  } catch (e: any) {
+    setError(e?.message ?? "오류가 발생했습니다.");
+    setItems([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const onSearch = () => {
     setPage(1);
@@ -558,3 +562,4 @@ export default function HrdCourses() {
     </>
   );
 }
+
