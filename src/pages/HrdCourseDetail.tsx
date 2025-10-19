@@ -215,7 +215,16 @@ useEffect(() => {
 
                 <div className="hd__actions">
                   {d.hpAddr && (
-                    <a className="hd__btn ghost" href={d.hpAddr} target="_blank" rel="noreferrer">
+                    <a
+                          className="hd__btn ghost"
+                          href={
+                            d.hpAddr.startsWith("http")
+                              ? d.hpAddr
+                              : `https://${d.hpAddr.replace(/^\/+/, "")}`
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                       공식 페이지
                     </a>
                   )}
