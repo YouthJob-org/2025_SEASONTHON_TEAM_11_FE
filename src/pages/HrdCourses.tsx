@@ -11,8 +11,8 @@ type HrdCourse = {
   subTitle?: string;        // 기관명
   address?: string;         // 주소(도/시)
   telNo?: string;           // 연락처
-  traStartDate?: string;    // 시작일 (YYYY-MM-DD)
-  traEndDate?: string;      // 종료일 (YYYY-MM-DD)
+  traStartDate?: string;    // 시작일
+  traEndDate?: string;      // 종료일
   trainTarget?: string;     // 대상
   trprId: string;
   trprDegr: string;
@@ -94,11 +94,10 @@ const NCS1_OPTIONS = [
   { value: "24", label: "농림어업" },
 ] as const;
 
+/** ✅ 백엔드 정렬 규칙과 일치 (2: 시작일, 3: 종료일) */
 const SORT_COL_OPTIONS = [
-  { value: "1", label: "훈련기관명" },
-  { value: "2", label: "훈련시작일" },
-  { value: "3", label: "기관 직종별 취업률" },
-  { value: "4", label: "만족도점수" },
+  { value: "2", label: "훈련시작일" }, // traStartDate
+  { value: "3", label: "훈련종료일" }, // traEndDate
 ] as const;
 
 const PAGE_SIZE_OPTIONS = [10, 20, 30] as const;
@@ -138,16 +137,11 @@ function dateLabel(a?: string, b?: string) {
   return a ? `${a} ~` : `~ ${b}`;
 }
 
-/** 썸네일 경로 빌더.
- *  - public/img/cards/ 아래에 이미지를 넣고 파일명을 반환.
- *  - 지금은 전부 기본 이미지(card1.jpg)를 사용.
- *  - 필요하면 기관명/과정ID별 매핑을 아래에 추가하면 됨.
- */
+/** 썸네일 경로 빌더 */
 const DEFAULT_THUMB = "/img/cards/card1.jpg";
 const THUMB_BY_ORG: Record<string, string> = {
   // 예: "러닝플러스 주식회사": "/img/cards/learningplus.jpg",
 };
-
 function getThumbSrc(c: HrdCourse) {
   if (c.subTitle && THUMB_BY_ORG[c.subTitle]) return THUMB_BY_ORG[c.subTitle];
   return DEFAULT_THUMB;
@@ -171,7 +165,8 @@ export default function HrdCourses() {
 
   const [area1, setArea1] = useState<string>("");
   const [ncs1, setNcs1] = useState<string>("");
-  const [sortCol, setSortCol] = useState<"1" | "2" | "3" | "4">("2");
+ 
+  const [sortCol, setSortCol] = useState<"2" | "3">("2");
   const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -179,6 +174,8 @@ export default function HrdCourses() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [items, setItems] = useState<HrdCourse[]>([]);
+  
+  const [hasNext, setHasNext] = useState(false);
 
   // 저장 상태: trprId|trprDegr -> savedId
   const [savedMap, setSavedMap] = useState<Record<string, number>>({});
@@ -202,42 +199,51 @@ export default function HrdCourses() {
 
   // 검색
   const fetchCourses = async () => {
-  setLoading(true);
-  setError("");
-  try {
-    const params = new URLSearchParams({
-      startDt: ymdInputToParam(startDate),
-      endDt: ymdInputToParam(endDate),
-      page: String(page),
-      size: String(size),
-      sort,
-      sortCol,
-    });
-    if (area1) params.append("area1", area1);
-    if (ncs1) params.append("ncs1", ncs1);
+    setLoading(true);
+    setError("");
+    try {
+      // 안전한 정렬 파라미터(혹시라도 외부 조작 대비)
+      const safeSortCol = sortCol === "3" ? "3" : "2";
 
-    const res = await fetch(`${API_BASE}/api/v1/hrd/courses?${params.toString()}`, {
-      headers: { ...getAuthHeader() },
-    });
-    if (res.status === 401) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
-      return;
+      const params = new URLSearchParams({
+        startDt: ymdInputToParam(startDate),
+        endDt: ymdInputToParam(endDate),
+        page: String(page),
+        size: String(size),
+        sort,
+        sortCol: safeSortCol,
+      });
+      if (area1) params.append("area1", area1);
+      if (ncs1) params.append("ncs1", ncs1);
+
+      const res = await fetch(`${API_BASE}/api/v1/hrd/courses?${params.toString()}`, {
+        headers: { ...getAuthHeader() },
+      });
+      if (res.status === 401) {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
+        return;
+      }
+      if (!res.ok) throw new Error("데이터를 불러오지 못했습니다.");
+
+      const json = await res.json();
+
+      if (Array.isArray(json)) {
+        setItems(json);
+        setHasNext(json.length === size); // 추정
+      } else {
+        const content: HrdCourse[] = json?.content ?? json?.data ?? [];
+        setItems(Array.isArray(content) ? content : []);
+        setHasNext(!!json?.hasNext);
+      }
+    } catch (e: any) {
+      setError(e?.message ?? "오류가 발생했습니다.");
+      setItems([]);
+      setHasNext(false);
+    } finally {
+      setLoading(false);
     }
-    if (!res.ok) throw new Error("데이터를 불러오지 못했습니다.");
-
-    const json = await res.json();
-    // 페이지/일반 응답 모두 처리
-    const list: HrdCourse[] = Array.isArray(json) ? json : (json?.content ?? json?.data ?? []);
-    setItems(Array.isArray(list) ? list : []);
-  } catch (e: any) {
-    setError(e?.message ?? "오류가 발생했습니다.");
-    setItems([]);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const onSearch = () => {
     setPage(1);
@@ -247,10 +253,11 @@ export default function HrdCourses() {
   useEffect(() => {
     fetchCourses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, size]);
+  }, [page, size, sort, sortCol, area1, ncs1, startDate, endDate]);
 
   const canPrev = page > 1;
-  const canNext = items.length === size;
+  
+  const canNext = hasNext;
 
   // 저장 토글
   async function toggleSave(course: HrdCourse) {
@@ -323,7 +330,7 @@ export default function HrdCourses() {
     if (parent) parent.classList.add("is-empty");
   }
   function onImgLoad(e: React.SyntheticEvent<HTMLImageElement>) {
-    const parent = (e.currentTarget.parentElement);
+    const parent = e.currentTarget.parentElement;
     if (parent) parent.classList.remove("is-empty");
   }
 
@@ -373,7 +380,7 @@ export default function HrdCourses() {
             <div className="hrd__row">
               <div className="hrd__field">
                 <label>정렬 기준</label>
-                <select value={sortCol} onChange={(e) => setSortCol(e.target.value as any)}>
+                <select value={sortCol} onChange={(e) => setSortCol(e.target.value as "2" | "3")}>
                   {SORT_COL_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
                       {o.label}
@@ -384,9 +391,9 @@ export default function HrdCourses() {
 
               <div className="hrd__field">
                 <label>정렬 방향</label>
-                <select value={sort} onChange={(e) => setSort(e.target.value as any)}>
-                  <option value="DESC">최신순</option>
-                  <option value="ASC">오래된순</option>
+                <select value={sort} onChange={(e) => setSort(e.target.value as "ASC" | "DESC")}>
+                  <option value="ASC">오름차순</option>
+                  <option value="DESC">내림차순</option>
                 </select>
               </div>
 
@@ -480,7 +487,6 @@ export default function HrdCourses() {
                           </span>
                         )}
                         <span className="hrd__tag hrd__tag--success">
-                          {/* 달러 아이콘 */}
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                             <path d="M12 1v22" />
                             <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
@@ -562,4 +568,3 @@ export default function HrdCourses() {
     </>
   );
 }
-
