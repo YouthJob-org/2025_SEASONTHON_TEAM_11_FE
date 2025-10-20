@@ -24,24 +24,11 @@ type HrdCourse = {
 
 type ApiResponse<T> = { code?: string | number; message?: string; data?: T };
 
-type SavedCourseDto = {
+/** 저장 목록(최소필드만 사용) */
+type SavedItemMin = {
   id: number;
   trprId: string;
   trprDegr: string;
-  title: string;
-  subTitle?: string;
-  address?: string;
-  telNo?: string;
-  traStartDate?: string;
-  traEndDate?: string;
-  trainTarget?: string;
-  trainTargetCd?: string;
-  ncsCd?: string;
-  courseMan?: string;
-  realMan?: string;
-  yardMan?: string;
-  titleLink?: string;
-  subTitleLink?: string;
 };
 
 /* ===================== Constants ===================== */
@@ -165,7 +152,7 @@ export default function HrdCourses() {
 
   const [area1, setArea1] = useState<string>("");
   const [ncs1, setNcs1] = useState<string>("");
- 
+
   const [sortCol, setSortCol] = useState<"2" | "3">("2");
   const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
   const [page, setPage] = useState<number>(1);
@@ -174,7 +161,7 @@ export default function HrdCourses() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
   const [items, setItems] = useState<HrdCourse[]>([]);
-  
+
   const [hasNext, setHasNext] = useState(false);
 
   // 저장 상태: trprId|trprDegr -> savedId
@@ -186,7 +173,7 @@ export default function HrdCourses() {
       try {
         const res = await fetch(`${API_BASE}/api/v1/hrd/saved`, { headers: { ...getAuthHeader() } });
         if (res.status === 401) return; // 비로그인 패스
-        const json: ApiResponse<SavedCourseDto[]> | SavedCourseDto[] = await res.json();
+        const json: ApiResponse<SavedItemMin[]> | SavedItemMin[] = await res.json();
         const data = Array.isArray(json) ? json : json?.data ?? [];
         const m: Record<string, number> = {};
         for (const s of data) if (s?.trprId && s?.trprDegr && s?.id) m[`${s.trprId}|${s.trprDegr}`] = s.id;
@@ -252,11 +239,10 @@ export default function HrdCourses() {
 
   useEffect(() => {
     fetchCourses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, size, sort, sortCol, area1, ncs1, startDate, endDate]);
 
   const canPrev = page > 1;
-  
   const canNext = hasNext;
 
   // 저장 토글
@@ -282,23 +268,11 @@ export default function HrdCourses() {
           return n;
         });
       } else {
+        
         const body = {
           trprId: course.trprId,
           trprDegr: course.trprDegr,
-          title: course.title,
-          subTitle: course.subTitle ?? "",
-          address: course.address ?? "",
-          telNo: course.telNo ?? "",
-          traStartDate: course.traStartDate ?? "",
-          traEndDate: course.traEndDate ?? "",
-          trainTarget: course.trainTarget ?? "",
-          trainTargetCd: "",
-          ncsCd: "",
-          courseMan: String(course.courseMan ?? ""),
-          realMan: "",
-          yardMan: String(course.yardMan ?? ""),
-          titleLink: course.titleLink ?? "",
-          subTitleLink: "",
+          torgId: course.torgId ?? undefined,
         };
 
         const res = await fetch(`${API_BASE}/api/v1/hrd/saved`, {
@@ -313,7 +287,7 @@ export default function HrdCourses() {
         }
         if (!res.ok) throw new Error("저장 실패");
 
-        const json: ApiResponse<SavedCourseDto> | SavedCourseDto = await res.json();
+        const json: ApiResponse<{ id: number } & SavedItemMin> | ({ id: number } & SavedItemMin) = await res.json();
         const saved = (json as any)?.data ?? json;
         if (saved?.id) setSavedMap((m) => ({ ...m, [key]: saved.id }));
       }
@@ -430,7 +404,7 @@ export default function HrdCourses() {
 
                 return (
                   <li key={`${c.trprId}-${c.trprDegr}`} className="hrd__card">
-                    {/* 우상단 즐겨찾기(심플 아이콘) */}
+                    {/* 우상단 즐겨찾기 */}
                     <button
                       aria-label={active ? "저장 취소" : "저장"}
                       onClick={() => toggleSave(c)}
